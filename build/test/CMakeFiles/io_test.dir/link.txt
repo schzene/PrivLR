@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/io_test.dir/io_test.cpp.o -o ../bin/io_test  ../src/libPrivLR.a ../src/protocols/libPrivLR_PROTOCOLS.a ../src/utils/libPrivLR_UTILS.a ../src/libPrivLR.a ../src/protocols/libPrivLR_PROTOCOLS.a ../src/utils/libPrivLR_UTILS.a -lntl -lgmp /usr/lib/gcc/x86_64-linux-gnu/11/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a 

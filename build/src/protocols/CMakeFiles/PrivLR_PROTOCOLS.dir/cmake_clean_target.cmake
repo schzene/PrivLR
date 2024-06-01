@@ -1,0 +1,3 @@
+file(REMOVE_RECURSE
+  "libPrivLR_PROTOCOLS.a"
+)

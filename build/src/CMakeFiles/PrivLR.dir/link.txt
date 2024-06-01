@@ -1,0 +1,2 @@
+/usr/bin/ar qc libPrivLR.a CMakeFiles/PrivLR.dir/logistic.cpp.o
+/usr/bin/ranlib libPrivLR.a
