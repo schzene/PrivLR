@@ -5,7 +5,6 @@ add_library(PrivLR
     logistic.cpp
 )
 
-
 target_include_directories(PrivLR PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )

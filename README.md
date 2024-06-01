@@ -4,13 +4,20 @@ PrivLR is Privacy Preserving Logistic Regression implement with C++, using paill
 
 # Build
 
+The following library must be installed before you build PrivLR:
+
+* GMP
+* NTL
+
+You can build PrivLR by following command: 
+
 ```bash
 mkdir build && cd build
 cmake ../
 make
 ```
 
-if you want to turn off the test sample, run:
+If you want to turn off the test sample, run:
 
 ```bash
 mkdir build && cd build
