@@ -1,2 +1,0 @@
-/usr/bin/ar qc libPrivLR_PROTOCOLS.a CMakeFiles/PrivLR_PROTOCOLS.dir/linear.cpp.o CMakeFiles/PrivLR_PROTOCOLS.dir/non-linear.cpp.o
-/usr/bin/ranlib libPrivLR_PROTOCOLS.a

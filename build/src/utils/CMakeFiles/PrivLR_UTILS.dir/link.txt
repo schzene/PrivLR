@@ -1,2 +1,0 @@
-/usr/bin/ar qc libPrivLR_UTILS.a CMakeFiles/PrivLR_UTILS.dir/data.cpp.o CMakeFiles/PrivLR_UTILS.dir/io.cpp.o CMakeFiles/PrivLR_UTILS.dir/paillier.cpp.o
-/usr/bin/ranlib libPrivLR_UTILS.a
