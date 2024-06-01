@@ -22,4 +22,4 @@ make
 
 This repository includes code from the following external repositories:
 
-[emp-toolkit/emp-tool](https://github.com/emp-toolkit/emp-tool) for Network IO
+[mpc-msri/EzPC](https://github.com/mpc-msri/EzPC) for Network IO
