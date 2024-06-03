@@ -2,6 +2,7 @@
 #define PRIV_LR_DATA_H__
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>

@@ -36,9 +36,8 @@ namespace paillier {
         } while (NTL::GCD(n, phi) != 1);
 
         lambda = phi / NTL::GCD(p - 1, q - 1);
-        mu = NTL::InvMod(lambda, n);
         public_key = PublicKey(n);
-        private_key = PrivateKey(lambda, mu, public_key);
+        private_key = PrivateKey(lambda, n, p, q);
     }
 
     CipherVector::CipherVector(const vector<ZZ> &messages, const PublicKey &_public_key) : public_key(_public_key) {
@@ -56,16 +55,24 @@ namespace paillier {
     }
 
     vector<ZZ> CipherVector::decrypt(const PrivateKey &private_key) const {
-        const ZZ n = private_key.public_key.n;
-        const ZZ n_square = n * n;
-        auto L = [&n](const ZZ &x) { return (x - 1) / n; };
+        const ZZ n = private_key.p * private_key.q;
+        const ZZ p = private_key.p, p_square = p * p, p1 = p - 1;
+        const ZZ q = private_key.q, q_square = q * q, q1 = q - 1;
+        auto Lp = [&p](const ZZ &x) { return (x - 1) / p; };
+        auto Lq = [&q](const ZZ &x) { return (x - 1) / q; };
+
+        const ZZ hp = NTL::InvMod(Lp((n * (p - 1) + 1) % p_square), p);
+        const ZZ hq = NTL::InvMod(Lq((n * (q - 1) + 1) % q_square), q);
+
         const size_t size = data.size();
         vector<ZZ> messages(size);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
         for (size_t i = 0; i < size; i++) {
-            messages[i] = (L(NTL::PowerMod(data[i], private_key.lambda, n_square)) * private_key.mu) % n;
+            const ZZ mp = Lp(NTL::PowerMod(data[i] % p_square, p1, p_square)) * hp % p;
+            const ZZ mq = Lq(NTL::PowerMod(data[i] % q_square, q1, q_square)) * hq % q;
+            messages[i] = mp + (((mq-mp) / p) % q) * p;
         }
         return messages;
     }
@@ -156,12 +163,12 @@ namespace paillier {
 #pragma omp parallel for
 #endif
             for (size_t i = 0; i < other_size; i++) {
-                ZZ ct = ((n * other[i] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+                ZZ ct = (n * other[i] + 1) % n_square;
                 result.data[i] = (data[0] * ct) % n_square;
             }
         } else if (other_size == 1) {
             result.data.resize(this_size);
-            ZZ ct = ((n * other[0] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+            ZZ ct = (n * other[0] + 1) % n_square;
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -174,7 +181,7 @@ namespace paillier {
 #pragma omp parallel for
 #endif
             for (size_t i = 0; i < other_size; i++) {
-                ZZ ct = ((n * other[i] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+                ZZ ct = (n * other[i] + 1) % n_square;
                 result.data[i] = (data[i] * ct) % n_square;
             }
         } else {
@@ -198,11 +205,11 @@ namespace paillier {
 #pragma omp parallel for
 #endif
             for (size_t i = 0; i < other_size; i++) {
-                ZZ ct = ((n * other[i] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+                ZZ ct = (n * other[i] + 1) % n_square;
                 data[i] = (this_data * ct) % n_square;
             }
         } else if (other_size == 1) {
-            ZZ ct = ((n * other[0] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+            ZZ ct = (n * other[0] + 1) % n_square;
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -214,7 +221,7 @@ namespace paillier {
 #pragma omp parallel for
 #endif
             for (size_t i = 0; i < other_size; i++) {
-                ZZ ct = ((n * other[i] + 1) * NTL::PowerMod(r, n, n_square)) % n_square;
+                ZZ ct = (n * other[i] + 1) % n_square;
                 data[i] = (data[i] * ct) % n_square;
             }
         } else {

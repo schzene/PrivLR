@@ -39,13 +39,12 @@ namespace paillier {
     class PrivateKey {
     public:
         ZZ lambda;
-        ZZ mu;
-        PublicKey public_key;
+        ZZ n;
+        ZZ p;
+        ZZ q;
 
         PrivateKey() {}
-        PrivateKey(const ZZ &_lambda, const ZZ &_mu, const PublicKey &_public_key) : lambda(_lambda),
-                                                                                     mu(_mu),
-                                                                                     public_key(_public_key) {}
+        PrivateKey(const ZZ &_lambda, const ZZ &_n, const ZZ &_p, const ZZ &_q) : lambda(_lambda), n(_n), p(_p), q(_q) {}
     };
 
     void keygen(PublicKey &public_key, PrivateKey &private_key, size_t key_length = 1024);
@@ -56,9 +55,18 @@ namespace paillier {
     }
 
     inline ZZ decrypt(const Ciphertext &ciphertext, const PrivateKey &private_key) {
-        ZZ n = private_key.public_key.n;
-        auto L = [&n](const ZZ &x) { return (x - 1) / n; };
-        ZZ message = (L(NTL::PowerMod(ciphertext.data, private_key.lambda, n * n)) * private_key.mu) % n;
+        const ZZ n = private_key.p * private_key.q;
+        const ZZ p = private_key.p, p_square = p * p, p1 = p - 1;
+        const ZZ q = private_key.q, q_square = q * q, q1 = q - 1;
+        auto Lp = [&p](const ZZ &x) { return (x - 1) / p; };
+        auto Lq = [&q](const ZZ &x) { return (x - 1) / q; };
+
+        const ZZ hp = NTL::InvMod(Lp((n * (p - 1) + 1) % p_square), p);
+        const ZZ hq = NTL::InvMod(Lq((n * (q - 1) + 1) % q_square), q);
+
+        const ZZ mp = Lp(NTL::PowerMod(ciphertext.data % p_square, p1, p_square)) * hp % p;
+        const ZZ mq = Lq(NTL::PowerMod(ciphertext.data % q_square, q1, q_square)) * hq % q;
+        ZZ message = mp + (((mq - mp) / p) % q) * p;
         return message;
     }
 

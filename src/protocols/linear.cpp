@@ -76,6 +76,7 @@ namespace PrivLR {
     }
 
     vector<double> Linear::dot_product(const vector<vector<double>> &in_a, const vector<double> &in_b, double transpose) const {
+        INIT_TIMER
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
