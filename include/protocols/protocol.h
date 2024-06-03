@@ -16,12 +16,13 @@ namespace PrivLR {
 
     class Protocol {
     protected:
-        int party;
-        IOPack *io_pack;
         PublicKey pk;
         PrivateKey sk;
 
     public:
+        int party;
+        IOPack *io_pack;
+
         Protocol(int party, IOPack *io_pack) {
             assert(party == ALICE || party == BOB);
             assert(io_pack != nullptr);

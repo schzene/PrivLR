@@ -1,9 +1,7 @@
 #include "non-linear.h"
 
-namespace PrivLR
-{
-    double NonLinear::mul2add(const double in) const
-    {
+namespace PrivLR {
+    double NonLinear::mul2add(const double in) const {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
@@ -11,8 +9,7 @@ namespace PrivLR
         std::uniform_real_distribution<> positive_dist2(0.5, 1);
         std::uniform_real_distribution<> negative_dist(-0.5, 0);
         double r1, r2;
-        if (party == ALICE)
-        {
+        if (party == ALICE) {
             r1 = positive_dist1(gen);
             r2 = positive_dist2(gen);
             double r1_in = r1 * in, r2_in = r2 * in;
@@ -40,11 +37,9 @@ namespace PrivLR
             io_pack->send_data(&ct_str_size, sizeof(size_t));
             io_pack->send_data(ct_str.data(), sizeof(char) * ct_str_size);
             io_pack->send_data(&r2_in, sizeof(double));
-
+            std::cout << r1 << " " << r2 << "\n";
             return r1b_inb * r1_in;
-        }
-        else
-        {
+        } else {
             r1 = negative_dist(gen);
             double r1_in = r1 * in, r2a_ina;
             ZZ r1_fixed = ZZ(uint64_t((-r1) * (1ull << BIT_LENGTH)));
@@ -68,13 +63,13 @@ namespace PrivLR
             Ciphertext r2_secret_b(string2ZZ(r2_str));
             ZZ r2_fixed = decrypt(r2_secret_b, sk);
             r2 = NTL::to_double(r2_fixed) / (1ull << BIT_LENGTH * 2);
+            std::cout << r1 << " " << r2 << "\n";
 
             return r2 * in * r2a_ina;
         }
     }
 
-    vector<double> NonLinear::mul2add(const vector<double> &in) const
-    {
+    vector<double> NonLinear::mul2add(const vector<double> &in) const {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
@@ -82,13 +77,11 @@ namespace PrivLR
         std::uniform_real_distribution<> positive_dist2(0.5, 1);
         std::uniform_real_distribution<> negative_dist(-0.5, 0);
         size_t size = in.size();
-        if (party == ALICE)
-        {
+        if (party == ALICE) {
             vector<double> r1(size), r2(size), r1_in(size), r2_in(size), r1b_inb(size);
             vector<ZZ> div_r2_fixed(size), r1_div_r2_fixed(size);
             CipherVector r1b_secret_b;
-            for (size_t i = 0; i < size; i++)
-            {
+            for (size_t i = 0; i < size; i++) {
                 r1[i] = positive_dist1(gen);
                 r2[i] = positive_dist2(gen);
                 r1_in[i] = r1[i] * in[i];
@@ -108,14 +101,11 @@ namespace PrivLR
                 r1b_inb[i] *= r1_in[i];
             }
             return r1b_inb;
-        }
-        else
-        {
+        } else {
             vector<double> r1(size), r1_in(size), r2a_ina(size);
             vector<ZZ> r1_fixed(size);
             CipherVector r2_secret_b;
-            for (size_t i = 0; i < size; i++)
-            {
+            for (size_t i = 0; i < size; i++) {
                 r1[i] = negative_dist(gen);
                 r1_in[i] = r1[i] * in[i];
                 r1_fixed[i] = ZZ(uint64_t((-r1[i]) * (1ull << BIT_LENGTH)));
@@ -136,8 +126,7 @@ namespace PrivLR
         }
     }
 
-    double NonLinear::sigmoid(const double in) const
-    {
+    double NonLinear::sigmoid(const double in) const {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
@@ -149,15 +138,13 @@ namespace PrivLR
         return r_add / (theta + theta_remote);
     }
 
-    vector<double> NonLinear::sigmoid(const vector<double> &in) const
-    {
+    vector<double> NonLinear::sigmoid(const vector<double> &in) const {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
         double size = in.size();
         vector<double> res(size), r(size), exp_neg_in(size), theta(size), theta_remote(size);
-        for (size_t i = 0; i < size; i++)
-        {
+        for (size_t i = 0; i < size; i++) {
             r[i] = dist(gen);
             exp_neg_in[i] = exp(-in[i]) * r[i];
         }

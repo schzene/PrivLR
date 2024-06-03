@@ -6,7 +6,7 @@ void load_dataset(vector<vector<double>> &datas, vector<int> &label, const strin
     while (std::getline(file, line)) {
         std::istringstream record(line);
         vector<double> data;
-        data.push_back(1.0);
+        data.push_back(0.5);
         double temp;
         while (record >> temp) {
             data.push_back(temp);

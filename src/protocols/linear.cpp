@@ -103,7 +103,7 @@ namespace PrivLR {
         }
         for (size_t i = 0; i < data_size; i++) {
             for (size_t j = 0; j < size; j++) {
-                res[i] += in_a[i][j] * in_b[j];
+                res[i] += in_a_flatten[i * size + j] * in_b[j];
                 in_b_flatten[i * size + j] = in_b[j];
                 in_a_flatten_signed[i * size + j] = in_a_flatten[i * size + j] < 0;
                 in_a_flatten_fixed[i * size + j] = ZZ(uint64_t((in_a_flatten_signed[i * size + j] ? -in_a_flatten[i * size + j] : in_a_flatten[i * size + j]) * (1ull << BIT_LENGTH)));
