@@ -25,7 +25,7 @@ namespace PrivLR {
         const size_t data_size = datas.size(), size = datas[0].size();
         weight = vector<double>(size, .5);
         while (max_cycles > 0) {
-            std::cout << "Cycle remain: " << max_cycles;
+            printf("Cycle remain: %3d", max_cycles);
             vector<double> classified = linear->dot_product(datas, weight);
             vector<double> h = non_linear->sigmoid(classified);
             vector<double> error(data_size);
@@ -50,7 +50,7 @@ namespace PrivLR {
                 for (size_t i = 0; i < data_size; i++) {
                     sum_error += abs(error_remote[i] + error[i]);
                 }
-                printf(" Error: %8.6lf\n", sum_error / data_size);
+                printf(", Error: %8.6lf\n", sum_error / data_size);
             }
             vector<double> delta_weight = linear->dot_product(datas, error, true);
             for (int i = 0; i < size; i++) {
