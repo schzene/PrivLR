@@ -56,4 +56,7 @@ int main(int argc, const char **argv) {
             cout  << true_res[j] - res[j] - res_a[j] << "\n";
         }
     }
+
+    delete io_pack;
+    delete linear;
 }

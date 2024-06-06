@@ -24,14 +24,17 @@ int main(int argc, const char **argv) {
     for (size_t i = 0; i < size; i++) {
         in[i] = dist(gen);
     }
+
+    vector<double> res = non_linear->sigmoid(in), res_remote(size);
+    io_pack->send_data(res.data(), sizeof(double) * size);
+    io_pack->recv_data(res_remote.data(), sizeof(double) * size);
     io_pack->send_data(in.data(), sizeof(double) * size);
     io_pack->recv_data(in_remote.data(), sizeof(double) * size);
-    auto res = non_linear->mul2add(party_);
-    // vector<double> res = non_linear->sigmoid(in), res_remote(size);
-    // io_pack->send_data(res.data(), sizeof(double) * size);
-    // io_pack->recv_data(res_remote.data(), sizeof(double) * size);
-    // std::cout << "error:\n";
-    // for (size_t i = 0; i < size; i++) {
-    //     std::cout << res[i] + res_remote[i] - 1 / (1 + exp(-in[i] - in_remote[i])) << "\n";
-    // }
+    std::cout << "error:\n";
+    for (size_t i = 0; i < size; i++) {
+        std::cout << res[i] + res_remote[i] - 1 / (1 + exp(-in[i] - in_remote[i])) << "\n";
+    }
+
+    delete io_pack;
+    delete non_linear;
 }

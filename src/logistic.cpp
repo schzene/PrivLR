@@ -25,13 +25,9 @@ namespace PrivLR {
         const size_t data_size = datas.size(), size = datas[0].size();
         weight = vector<double>(size, .5);
         while (max_cycles > 0) {
-            printf("Cycle remain: %3d", max_cycles);
             vector<double> classified = linear->dot_product(datas, weight);
             vector<double> h = non_linear->sigmoid(classified);
             vector<double> error(data_size);
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
             // START_TIMER
             for (int i = 0; i < data_size; i++) {
                 double dist = label[i] - h[i];
@@ -40,49 +36,26 @@ namespace PrivLR {
                 }
                 error[i] = dist;
             }
-
-            // Not a protocol content, only for statistical purposes
-            {
-                double sum_error = 0;
-                vector<double> error_remote(data_size);
-                io_pack->send_data(error.data(), sizeof(double) * data_size, false);
-                io_pack->recv_data(error_remote.data(), sizeof(double) * data_size, false);
-                for (size_t i = 0; i < data_size; i++) {
-                    sum_error += abs(error_remote[i] + error[i]);
-                }
-                printf(", Error: %8.6lf\n", sum_error / data_size);
-            }
             vector<double> delta_weight = linear->dot_product(datas, error, true);
             for (int i = 0; i < size; i++) {
                 weight[i] += alpha * delta_weight[i];
             }
+            // printf("Cycle remain: %3d", max_cycles);, Error: 
             max_cycles--;
-        }
-    }
 
-    void Logistic::stocGradAscent(vector<vector<double>> &datas, vector<int> &label,
-                                  int numIter, double alpha) {
-        double h = 0.0;
-        int i = 0;
-        int j = 0;
-        double error = 0.0;
-        const size_t data_size = datas.size(), size = datas[0].size();
-        vector<int> rand_idx(data_size);
-        weight = vector<double>(size, 1);
-        for (i = 0; i < data_size; i++) {
-            rand_idx[i] = i;
-        }
-
-        for (int k = 0; k < numIter; k++) {
-            std::random_shuffle(rand_idx.begin(), rand_idx.end());
-
-            for (i = 0; i < data_size; i++) {
-                alpha = 4 / (1 + k + i) + alpha;
-                h = non_linear->sigmoid(linear->dot_product(datas[rand_idx[i]], weight));
-                error = label[rand_idx[i]] - h;
-                for (j = 0; j < weight.size(); j++) {
-                    weight[j] += alpha * error * datas[rand_idx[i]][j];
+            // Not a protocol content, only for statistical purposes
+            {
+                double sum_error = 0.;
+                vector<double> h_remote(data_size);
+                vector<int> label_remote(data_size);
+                io_pack->send_data(h.data(), sizeof(double) * data_size, false);
+                io_pack->send_data(label.data(), sizeof(int) * data_size, false);
+                io_pack->recv_data(h_remote.data(), sizeof(double) * data_size, false);
+                io_pack->recv_data(label_remote.data(), sizeof(int) * data_size, false);
+                for (size_t i = 0; i < data_size; i++) {
+                    sum_error += -1 * (label[i] + label_remote[i]) * log(h[i] + h_remote[i]) - (1 - label[i] - label_remote[i]) * log(1 - h[i] - h_remote[i]);
                 }
+                printf("loss: %.10lf\n", sum_error / data_size);
             }
         }
     }

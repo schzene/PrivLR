@@ -47,7 +47,7 @@ namespace paillier {
         PrivateKey(const ZZ &_lambda, const ZZ &_n, const ZZ &_p, const ZZ &_q) : lambda(_lambda), n(_n), p(_p), q(_q) {}
     };
 
-    void keygen(PublicKey &public_key, PrivateKey &private_key, size_t key_length = 1024);
+    void keygen(PublicKey &public_key, PrivateKey &private_key, size_t key_length = 128);
 
     inline Ciphertext encrypt(const ZZ &message, const PublicKey &public_key) {
         ZZ n = public_key.n, r = NTL::RandomBnd(n);

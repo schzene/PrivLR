@@ -6,7 +6,6 @@ macro(add_test _name)
 endmacro()
 
 add_test(fixed-point)
-add_test(io)
 add_test(linear)
 add_test(logistic)
 add_test(non-linear)

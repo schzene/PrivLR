@@ -30,30 +30,6 @@ int main(int argc, const char **argv) {
     PublicKey pk;
     PrivateKey sk;
     keygen(pk, sk);
-    // std::random_device rd;
-    // std::mt19937 gen(rd());
-    // std::uniform_real_distribution<> dist(0, 1);
-    // size_t size = 10;
-
-    // vector<double> a(size, dist(gen));
-    // vector<double> b(size, dist(gen));
-    // vector<ZZ> a_fixed(size), b_fixed(size);
-    // for (size_t i = 0; i < size; i++) {
-    //     a_fixed[i] = uint64_t(a[i] * (1ull << 31));
-    //     b_fixed[i] = uint64_t(b[i] * (1ull << 31));
-    // }
-
-    // CipherVector a_secret(a_fixed, pk), b_secret(b_fixed, pk);
-    // a_secret.add_inplace(b_secret);
-    // auto res_fixed = a_secret.decrypt(sk);
-    // vector<double> res(size);
-    // for (size_t i = 0; i < size; i++) {
-    //     res[i] = NTL::to_double(res_fixed[i]) / (1ull << 31) - a[i] - b[i];
-    //     // std::cout << res[i] << "\n";
-    // }
-    // ZZ test = a_secret.data[0];
-    // std::cout << test << "\n\n";
-    // std::cout << stringToNumber(numberToString(test)) << "\n";
 
     int party_ = argv[1][0] - '0';
     if (party_ == ALICE) {
@@ -73,7 +49,7 @@ int main(int argc, const char **argv) {
         CipherVector::recv(io_pack, &ct_aa);
         vector<ZZ> aa = ct_aa.decrypt(sk);
         for (size_t i = 0; i < 10; i++) {
-            std::cout << a[i] - aa[i] << "\n";
+            std::cout << "error: " << a[i] - aa[i] + 5 << "\n";
         }
     } else {
         CipherVector ct_a;
@@ -82,4 +58,6 @@ int main(int argc, const char **argv) {
         ct_a.add_plain_inplace(a);
         CipherVector::send(io_pack, &ct_a);
     }
+
+    delete io_pack;
 }
