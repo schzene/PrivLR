@@ -55,7 +55,18 @@ namespace paillier {
     }
 
     vector<ZZ> CipherVector::decrypt(const PrivateKey &private_key) const {
-        const ZZ n = private_key.p * private_key.q;
+#ifndef PAILLIER_CRT
+        const ZZ n = private_key.n, n_square = n * n;
+        const ZZ mu = NTL::InvMod(private_key.lambda, n_square);
+        auto L = [&n](const ZZ &x) { return (x - 1) / n; };
+        const size_t size = data.size();
+        vector<ZZ> messages(size);
+        for (size_t i = 0; i < size; i++) {
+            messages[i] = L(NTL::PowerMod(data[i], private_key.lambda, n_square)) * mu % n;
+        }
+        return messages;
+#else
+        const ZZ n = private_key.n;
         const ZZ p = private_key.p, p_square = p * p, p1 = p - 1;
         const ZZ q = private_key.q, q_square = q * q, q1 = q - 1;
         auto Lp = [&p](const ZZ &x) { return (x - 1) / p; };
@@ -72,9 +83,10 @@ namespace paillier {
         for (size_t i = 0; i < size; i++) {
             const ZZ mp = Lp(NTL::PowerMod(data[i] % p_square, p1, p_square)) * hp % p;
             const ZZ mq = Lq(NTL::PowerMod(data[i] % q_square, q1, q_square)) * hq % q;
-            messages[i] = mp + (((mq-mp) / p) % q) * p;
+            messages[i] = mp + (((mq - mp) / p) % q) * p;
         }
         return messages;
+#endif
     }
 
     CipherVector CipherVector::add(const CipherVector &other) const {

@@ -12,6 +12,8 @@
 
 #include "io.h"
 
+#define PAILLIER_CRT
+
 using NTL::ZZ;
 using std::vector;
 

@@ -40,7 +40,7 @@ namespace PrivLR {
             for (int i = 0; i < size; i++) {
                 weight[i] += alpha * delta_weight[i];
             }
-            // printf("Cycle remain: %3d", max_cycles);, Error: 
+            printf("Cycle remain: %3d", max_cycles);
             max_cycles--;
 
             // Not a protocol content, only for statistical purposes

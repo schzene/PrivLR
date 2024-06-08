@@ -53,7 +53,7 @@ int main(int argc, const char **argv) {
         }
         std::cout << "error: " << "\n";
         for (size_t j = 0; j < data_size; j++) {
-            cout  << true_res[j] - res[j] - res_a[j] << "\n";
+            cout << true_res[j] - res[j] - res_a[j] << "\n";
         }
     }
 
