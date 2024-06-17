@@ -40,11 +40,11 @@ namespace PrivLR {
             for (int i = 0; i < size; i++) {
                 weight[i] += alpha * delta_weight[i];
             }
-            printf("Cycle remain: %3d", max_cycles);
             max_cycles--;
 
             // Not a protocol content, only for statistical purposes
             {
+                printf("Cycle remain: %3d", max_cycles);
                 double sum_error = 0.;
                 vector<double> h_remote(data_size);
                 vector<int> label_remote(data_size);
@@ -55,7 +55,7 @@ namespace PrivLR {
                 for (size_t i = 0; i < data_size; i++) {
                     sum_error += -1 * (label[i] + label_remote[i]) * log(h[i] + h_remote[i]) - (1 - label[i] - label_remote[i]) * log(1 - h[i] - h_remote[i]);
                 }
-                printf("loss: %.10lf\n", sum_error / data_size);
+                printf(", loss: %.10lf\n", sum_error / data_size);
             }
         }
     }
