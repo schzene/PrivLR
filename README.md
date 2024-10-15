@@ -1,6 +1,6 @@
 # PrivLR: Privacy Preserving Logistic Regression
 
-PrivLR is Privacy Preserving Logistic Regression implement with C++, using paillier.
+PrivLR is Privacy Preserving Logistic Regression implement with C++, using paillier and BFV.
 
 # Build
 
