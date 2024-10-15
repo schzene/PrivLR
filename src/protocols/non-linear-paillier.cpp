@@ -28,8 +28,8 @@ double NonLinear::mul2add(const double in) const {
         paillier::PublicKey pkb(string2ZZ(pkb_str));
         paillier::Ciphertext r1b_secret_b(string2ZZ(r1b_str));
 
-        ZZ div_r2_fixed    = ZZ(uint64_t((1 / r2) * (1ull << BIT_LENGTH * 2)));
-        ZZ r1_div_r2_fixed = ZZ(uint64_t((r1 / r2) * (1ull << BIT_LENGTH)));
+        ZZ div_r2_fixed    = ZZ(uint64_t((1 / r2) * (1ULL << (2 * SCALE))) % (1ULL << BIT_LENGTH));
+        ZZ r1_div_r2_fixed = ZZ(uint64_t((r1 / r2) * (1ULL << SCALE)) % (1ULL << BIT_LENGTH));
         mul_plain_inplace(r1b_secret_b, r1_div_r2_fixed, pkb);
         add_plain_inplace(r1b_secret_b, div_r2_fixed, pkb);
         string ct_str      = ZZ2string(r1b_secret_b.data);
@@ -37,13 +37,13 @@ double NonLinear::mul2add(const double in) const {
         io_pack->send_data(&ct_str_size, sizeof(size_t));
         io_pack->send_data(ct_str.data(), sizeof(char) * ct_str_size);
         io_pack->send_data(&r2_in, sizeof(double));
-        std::cout << r1 << " " << r2 << "\n";
+
         return r1b_inb * r1_in;
     }
     else {
         r1                               = negative_dist(gen);
         double r1_in                     = r1 * in, r2a_ina;
-        ZZ r1_fixed                      = ZZ(uint64_t((-r1) * (1ull << BIT_LENGTH)));
+        ZZ r1_fixed                      = ZZ(uint64_t((-r1) * (1ULL << SCALE)));
         paillier::Ciphertext r1_secret_b = encrypt(r1_fixed, pk);
         string pk_str                    = ZZ2string(pk.n);
         size_t pk_str_size               = pk_str.size();
@@ -63,8 +63,7 @@ double NonLinear::mul2add(const double in) const {
         io_pack->recv_data(&r2a_ina, sizeof(double));
         paillier::Ciphertext r2_secret_b(string2ZZ(r2_str));
         ZZ r2_fixed = decrypt(r2_secret_b, sk);
-        r2          = NTL::to_double(r2_fixed) / (1ull << BIT_LENGTH * 2);
-        std::cout << r1 << " " << r2 << "\n";
+        r2          = NTL::to_double(r2_fixed) / (1ULL << (2 * SCALE));
 
         return r2 * in * r2a_ina;
     }
@@ -87,8 +86,8 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
             r2[i]              = positive_dist2(gen);
             r1_in[i]           = r1[i] * in[i];
             r2_in[i]           = r2[i] * in[i];
-            div_r2_fixed[i]    = ZZ(uint64_t((1 / r2[i]) * (1ull << BIT_LENGTH * 2)));
-            r1_div_r2_fixed[i] = ZZ(uint64_t((r1[i] / r2[i]) * (1ull << BIT_LENGTH)));
+            div_r2_fixed[i]    = ZZ(uint64_t((1 / r2[i]) * (1ULL << (2 * SCALE))) % (1ULL << BIT_LENGTH));
+            r1_div_r2_fixed[i] = ZZ(uint64_t((r1[i] / r2[i]) * (1ULL << (SCALE))) % (1ULL << BIT_LENGTH));
         }
         CipherVector::recv(io_pack, &r1b_secret_b);
         io_pack->recv_data(r1b_inb.data(), sizeof(double) * size);
@@ -110,7 +109,7 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         for (size_t i = 0; i < size; i++) {
             r1[i]       = negative_dist(gen);
             r1_in[i]    = r1[i] * in[i];
-            r1_fixed[i] = ZZ(uint64_t((-r1[i]) * (1ull << BIT_LENGTH)));
+            r1_fixed[i] = ZZ(uint64_t((-r1[i]) * (1ull << SCALE)) % (1ULL << BIT_LENGTH));
         }
         CipherVector r1_secret_b(r1_fixed, pk);
         CipherVector::send(io_pack, &r1_secret_b);
@@ -121,7 +120,7 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         vector<ZZ> r2_fixed = r2_secret_b.decrypt(sk);
 
         for (size_t i = 0; i < size; i++) {
-            r2a_ina[i] = r2a_ina[i] * in[i] * NTL::to_double(r2_fixed[i]) / (1ull << BIT_LENGTH * 2);
+            r2a_ina[i] = r2a_ina[i] * in[i] * NTL::to_double(r2_fixed[i] % (1ULL << BIT_LENGTH)) / (1ULL << (2 * SCALE));
         }
 
         return r2a_ina;

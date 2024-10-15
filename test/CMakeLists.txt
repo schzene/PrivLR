@@ -5,6 +5,7 @@ macro(add_test _name)
     target_link_libraries(${_name} PUBLIC PrivLR ntl)
 endmacro()
 
+add_test(linear-bfv)
 add_test(linear-elgamal)
 add_test(linear-paillier)
 

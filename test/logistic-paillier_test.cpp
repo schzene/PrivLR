@@ -91,16 +91,16 @@ void testPlaintext() {
     std::cout << "**************************************************\n" << "testPlaintext(Base)\n" << "**************************************************\n";
     vector<vector<double>> base_train_mat;
     vector<int> base_train_label;
-    string base_train_file("/data/PrivLR/ACAD");
+    // string base_train_file("/data/PrivLR/ACAD");
     // string base_train_file("/data/PrivLR/HFCR");
-    // string base_train_file("/data/PrivLR/WIBC");
+    string base_train_file("/data/PrivLR/WIBC");
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
 
     vector<vector<double>> base_test_mat;
     vector<int> base_test_label;
-    string base_test_file("/data/PrivLR/ACAD_test");
+    // string base_test_file("/data/PrivLR/ACAD_test");
     // string base_test_file("/data/PrivLR/HFCR_test");
-    // string base_test_file("/data/PrivLR/WIBC_test");
+    string base_test_file("/data/PrivLR/WIBC_test");
     load_dataset_base(base_test_mat, base_test_label, base_test_file);
 
     vector<double> base_weight(base_train_mat[0].size(), 1);
