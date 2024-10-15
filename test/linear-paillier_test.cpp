@@ -1,5 +1,5 @@
-#include <protocols/linear.h>
-using namespace PrivLR;
+#include <protocols/linear-paillier.h>
+using namespace PrivLR_Paillier;
 
 int main(int argc, const char **argv) {
     std::random_device rd;

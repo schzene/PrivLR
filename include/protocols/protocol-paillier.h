@@ -11,13 +11,13 @@
 
 using std::vector;
 
-namespace PrivLR {
+namespace PrivLR_Paillier {
     using namespace paillier;
 
     class Protocol {
     protected:
-        PublicKey pk;
-        PrivateKey sk;
+        paillier::PublicKey pk;
+        paillier::PrivateKey sk;
 
     public:
         int party;

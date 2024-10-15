@@ -1,6 +1,6 @@
-#include "linear.h"
+#include "linear-paillier.h"
 
-namespace PrivLR {
+namespace PrivLR_Paillier {
     double Linear::dot_product(const vector<double> &in_a, const vector<double> &in_b) const {
         assert(in_a.size() == in_b.size());
         size_t size = in_a.size();

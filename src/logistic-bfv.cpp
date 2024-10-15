@@ -1,8 +1,8 @@
-#include "logistic.h"
+#include "logistic-bfv.h"
 
-namespace PrivLR {
-    Logistic::Logistic(int party, IOPack *io_pack) {
-        assert(party == ALICE || party == BOB);
+namespace PrivLR_BFV {
+    Logistic::Logistic(BFVKey* party, IOPack *io_pack) {
+        assert(party != nullptr);
         assert(io_pack != nullptr);
         this->io_pack = io_pack;
         this->linear = new Linear(party, io_pack);

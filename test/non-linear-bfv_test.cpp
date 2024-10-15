@@ -1,5 +1,5 @@
-#include <protocols/non-linear.h>
-using namespace PrivLR;
+#include <protocols/non-linear-bfv.h>
+using namespace PrivLR_BFV;
 
 int main(int argc, const char **argv) {
     std::random_device rd;
@@ -17,9 +17,11 @@ int main(int argc, const char **argv) {
         std::cout << "Party: BOB"
                   << "\n";
     }
+    BFVParm *parm = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
+    BFVKey *party = new BFVKey(party_, parm);
     IOPack *io_pack = new IOPack(party_);
 
-    NonLinear *non_linear = new NonLinear(party_, io_pack);
+    NonLinear *non_linear = new NonLinear(party, io_pack);
     vector<double> in(size), in_remote(size);
     for (size_t i = 0; i < size; i++) {
         in[i] = dist(gen);

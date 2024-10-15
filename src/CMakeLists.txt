@@ -2,7 +2,8 @@ add_subdirectory(protocols)
 add_subdirectory(utils)
 
 add_library(PrivLR
-    logistic.cpp
+    logistic-bfv.cpp
+    logistic-paillier.cpp
 )
 
 target_include_directories(PrivLR PUBLIC
@@ -11,5 +12,4 @@ target_include_directories(PrivLR PUBLIC
 
 target_link_libraries(PrivLR PUBLIC
     PrivLR_PROTOCOLS
-    PrivLR_UTILS
 )

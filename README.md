@@ -44,4 +44,6 @@ make
 
 This repository includes code from the following external repositories:
 
-[mpc-msri/EzPC](https://github.com/mpc-msri/EzPC) for Network IO
+[Microsoft/SEAL](https://github.com/microsoft/SEAL) for cryptographic tools,
+
+[mpc-msri/EzPC](https://github.com/mpc-msri/EzPC) for Network IO.

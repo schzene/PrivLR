@@ -1,6 +1,6 @@
-#include <logistic.h>
+#include <logistic-bfv.h>
 
-using namespace PrivLR;
+using namespace PrivLR_BFV;
 int num_iter = 25;
 
 INIT_TIMER
@@ -91,16 +91,16 @@ void testPlaintext() {
     std::cout << "**************************************************\n" << "testPlaintext(Base)\n" << "**************************************************\n";
     vector<vector<double>> base_train_mat;
     vector<int> base_train_label;
-    string base_train_file("/data/PrivLR/ACAD");
+    // string base_train_file("/data/PrivLR/ACAD");
     // string base_train_file("/data/PrivLR/HFCR");
-    // string base_train_file("/data/PrivLR/WIBC");
+    string base_train_file("/data/PrivLR/WIBC");
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
 
     vector<vector<double>> base_test_mat;
     vector<int> base_test_label;
-    string base_test_file("/data/PrivLR/ACAD_test");
+    // string base_test_file("/data/PrivLR/ACAD_test");
     // string base_test_file("/data/PrivLR/HFCR_test");
-    // string base_test_file("/data/PrivLR/WIBC_test");
+    string base_test_file("/data/PrivLR/WIBC_test");
     load_dataset_base(base_test_mat, base_test_label, base_test_file);
 
     vector<double> base_weight(base_train_mat[0].size(), 1);
@@ -113,22 +113,24 @@ void testPlaintext() {
     std::cout << "**************************************************\n\n";
 }
 
-void PrivLR_test(int &party) {
+void PrivLR_test(int &_party) {
     std::cout << "**************************************************\n" << "PrivLR_test:\n" << "**************************************************\n";
     string train_file, test_file;
-    if (party == ALICE) {
+    if (_party == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
         train_file = "/data/PrivLR/WIBC_alice";
         test_file = "/data/PrivLR/WIBC_alice_test";
     } else {
-        party = BOB;
+        _party = BOB;
         std::cout << "Party: BOB"
                   << "\n";
         train_file = "/data/PrivLR/WIBC_bob";
         test_file = "/data/PrivLR/WIBC_bob_test";
     }
-    IOPack *io_pack = new IOPack(party);
+    BFVParm *parm = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
+    BFVKey *party = new BFVKey(_party, parm);
+    IOPack *io_pack = new IOPack(_party);
 
     vector<vector<double>> train_mat, test_mat;
     vector<int> train_label, test_label;
@@ -156,7 +158,7 @@ void PrivLR_test(int &party) {
 
     size_t test_size = test_mat.size();
     vector<double> result = logistic->classify(test_mat);
-    if (party == BOB) {
+    if (_party == BOB) {
         io_pack->send_data(result.data(), sizeof(double) * test_size);
         io_pack->send_data(test_label.data(), sizeof(int) * test_size);
     } else {
@@ -183,7 +185,7 @@ void PrivLR_test(int &party) {
 int main(int argc, const char **argv) {
     int party = argv[1][0] - '0';
     PrivLR_test(party);
-    // if (party == BOB) {
-    //     testPlaintext();
-    // }
+    if (party == BOB) {
+        testPlaintext();
+    }
 }

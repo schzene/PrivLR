@@ -1,9 +1,9 @@
 #ifndef PRIV_LR_MUL_H__
 #define PRIV_LR_MUL_H__
 
-#include "protocol.h"
+#include "protocol-paillier.h"
 
-namespace PrivLR {
+namespace PrivLR_Paillier {
     class Linear : public Protocol {
     public:
         Linear(int party, IOPack *io_pack) : Protocol(party, io_pack) {}

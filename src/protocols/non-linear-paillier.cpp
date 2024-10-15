@@ -1,6 +1,6 @@
-#include "non-linear.h"
+#include "non-linear-paillier.h"
 
-namespace PrivLR {
+namespace PrivLR_Paillier {
     double NonLinear::mul2add(const double in) const {
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -25,8 +25,8 @@ namespace PrivLR {
             r1b_str.resize(r1b_str_size);
             io_pack->recv_data(r1b_str.data(), sizeof(char) * r1b_str_size);
             io_pack->recv_data(&r1b_inb, sizeof(double));
-            PublicKey pkb(string2ZZ(pkb_str));
-            Ciphertext r1b_secret_b(string2ZZ(r1b_str));
+            paillier::PublicKey pkb(string2ZZ(pkb_str));
+            paillier::Ciphertext r1b_secret_b(string2ZZ(r1b_str));
 
             ZZ div_r2_fixed = ZZ(uint64_t((1 / r2) * (1ull << BIT_LENGTH * 2)));
             ZZ r1_div_r2_fixed = ZZ(uint64_t((r1 / r2) * (1ull << BIT_LENGTH)));
@@ -43,7 +43,7 @@ namespace PrivLR {
             r1 = negative_dist(gen);
             double r1_in = r1 * in, r2a_ina;
             ZZ r1_fixed = ZZ(uint64_t((-r1) * (1ull << BIT_LENGTH)));
-            Ciphertext r1_secret_b = encrypt(r1_fixed, pk);
+            paillier::Ciphertext r1_secret_b = encrypt(r1_fixed, pk);
             string pk_str = ZZ2string(pk.n);
             size_t pk_str_size = pk_str.size();
             string ct_str = ZZ2string(r1_secret_b.data);
@@ -60,7 +60,7 @@ namespace PrivLR {
             r2_str.resize(r2_str_size);
             io_pack->recv_data(r2_str.data(), sizeof(char) * r2_str_size);
             io_pack->recv_data(&r2a_ina, sizeof(double));
-            Ciphertext r2_secret_b(string2ZZ(r2_str));
+            paillier::Ciphertext r2_secret_b(string2ZZ(r2_str));
             ZZ r2_fixed = decrypt(r2_secret_b, sk);
             r2 = NTL::to_double(r2_fixed) / (1ull << BIT_LENGTH * 2);
             std::cout << r1 << " " << r2 << "\n";
