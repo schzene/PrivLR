@@ -1,5 +1,6 @@
 add_library(PrivLR_PROTOCOLS
     linear-bfv.cpp
+    linear-elgamal.cpp
     linear-paillier.cpp
     non-linear-bfv.cpp
     non-linear-paillier.cpp

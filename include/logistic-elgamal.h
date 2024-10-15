@@ -3,11 +3,10 @@
 
 #include <algorithm>
 
-#include "protocols/linear-bfv.h"
-#include "protocols/non-linear-bfv.h"
-#include "utils/bfv-tools.h"
+#include "protocols/linear-elgamal.h"
+#include "protocols/non-linear-elgamal.h"
 
-namespace PrivLR_BFV {
+namespace PrivLR_Elgamal {
 class Logistic {
     IOPack* io_pack       = nullptr;
     Linear* linear        = nullptr;
@@ -15,7 +14,7 @@ class Logistic {
 
 public:
     vector<double> weight;
-    Logistic(BFVKey* party, IOPack* io_pack);
+    Logistic(int party, IOPack* io_pack, ec_elgamal_secret_key sk, ec_elgamal_public_key pk);
     ~Logistic();
     void gradAscent(vector<vector<double>>& datas, vector<int>& label, int max_cycles = 500,
                     const double alpha = 0.001);
@@ -28,6 +27,6 @@ public:
         return non_linear->sigmoid(linear->dot_product(datas, weight));
     }
 };
-}  // namespace PrivLR_BFV
+}  // namespace PrivLR_Elgamal
 
 #endif

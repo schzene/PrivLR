@@ -395,13 +395,11 @@ size_t get_encoded_ciphertext_size(ec_elgamal_ciphertext* ciphertext) {
     return (size_t) ec_elgamal_get_point_compressed_size()*2;
 }
 
-int encode_ciphertext(unsigned char *buff, int size, ec_elgamal_ciphertext* ciphertext) {
+int encode_ciphertext(unsigned char *buff, ec_elgamal_ciphertext* ciphertext) {
     unsigned char *cur_ptr = buff;
     size_t len_point, tmp;
     BN_CTX *ctx = BN_CTX_new();
     len_point = (size_t) ec_elgamal_get_point_compressed_size();
-    if (size < (len_point * 2))
-        return -1;
     tmp = EC_POINT_point2oct(init_group, ciphertext->C1, POINT_CONVERSION_COMPRESSED, cur_ptr, len_point, ctx);
     cur_ptr += len_point;
     if (tmp != len_point)
@@ -413,19 +411,15 @@ int encode_ciphertext(unsigned char *buff, int size, ec_elgamal_ciphertext* ciph
     return 0;
 }
 
-int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char *buff, int size) {
+int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char *buff) {
     size_t len_point;
     BN_CTX *ctx = BN_CTX_new();
     unsigned char *cur_ptr = buff;
     len_point = (size_t) ec_elgamal_get_point_compressed_size();
-    if (size < len_point*2)
-        return -1;
 
-    ciphertext->C1 = EC_POINT_new(init_group);
     EC_POINT_oct2point(init_group, ciphertext->C1, cur_ptr, len_point, ctx);
     cur_ptr += len_point;
 
-    ciphertext->C2 = EC_POINT_new(init_group);
     EC_POINT_oct2point(init_group, ciphertext->C2, cur_ptr, len_point, ctx);
 
     BN_CTX_free(ctx);

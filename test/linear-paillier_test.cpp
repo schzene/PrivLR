@@ -51,9 +51,14 @@ int main(int argc, const char **argv) {
                 true_res[j] += (in_a[i][j] + in_a_a[i][j]) * (in_b[i] + in_b_a[i]);
             }
         }
-        std::cout << "error: " << "\n";
+        std::cout << "true_res: " << "\n";
         for (size_t j = 0; j < data_size; j++) {
-            cout << true_res[j] - res[j] - res_a[j] << "\n";
+            cout << true_res[j] << "\n";
+        }
+
+        std::cout << "res: " << "\n";
+        for (size_t j = 0; j < data_size; j++) {
+            cout << res[j] + res_a[j] << "\n";
         }
     }
 

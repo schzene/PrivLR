@@ -12,20 +12,26 @@
 
 using std::vector;
 
-namespace PrivLR_BFV {
+namespace PrivLR_Elgamal {
+using namespace EC_Elgamal;
+
 class Protocol {
 protected:
-    BFVKey* party;
+    ec_elgamal_secret_key sk;
+    ec_elgamal_public_key pk;
 
 public:
+    int party;
     IOPack* io_pack;
 
-    Protocol(BFVKey* party, IOPack* io_pack) {
+    Protocol(int party, IOPack* io_pack, ec_elgamal_secret_key sk, ec_elgamal_public_key pk) {
         assert(io_pack != nullptr);
         this->party   = party;
         this->io_pack = io_pack;
+        this->sk      = sk;
+        this->pk      = pk;
     }
 };
-}  // namespace PrivLR_BFV
+}  // namespace PrivLR_Elgamal
 
 #endif

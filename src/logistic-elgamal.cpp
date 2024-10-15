@@ -1,12 +1,13 @@
-#include "logistic-bfv.h"
+#include "logistic-elgamal.h"
 
-namespace PrivLR_BFV {
-Logistic::Logistic(BFVKey* party, IOPack* io_pack) {
-    assert(party != nullptr);
+namespace PrivLR_Elgamal {
+Logistic::Logistic(int party, IOPack* io_pack, ec_elgamal_secret_key sk, ec_elgamal_public_key pk) {
     assert(io_pack != nullptr);
+    assert(sk != nullptr);
+    assert(pk != nullptr);
     this->io_pack    = io_pack;
-    this->linear     = new Linear(party, io_pack);
-    this->non_linear = new NonLinear(party, io_pack);
+    this->linear     = new Linear(party, io_pack, sk, pk);
+    this->non_linear = new NonLinear(party, io_pack, sk, pk);
 }
 
 Logistic::~Logistic() {
@@ -59,4 +60,4 @@ void Logistic::gradAscent(vector<vector<double>>& datas, vector<int>& label, int
         }
     }
 }
-}  // namespace PrivLR_BFV
+}  // namespace PrivLR_Elgamal

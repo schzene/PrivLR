@@ -60,8 +60,8 @@ typedef struct {
 ec_elgamal_ciphertext* ec_elgamal_new_ciphertext();
 int ec_elgamal_free_ciphertext(ec_elgamal_ciphertext* ciphertext);
 size_t get_encoded_ciphertext_size(ec_elgamal_ciphertext* ciphertext);
-int encode_ciphertext(unsigned char* buff, int size, ec_elgamal_ciphertext* ciphertext);
-int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char* buff, int size);
+int encode_ciphertext(unsigned char* buff, ec_elgamal_ciphertext* ciphertext);
+int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char* buff);
 
 typedef struct bsgs_hash_table_entry {
     unsigned char *key;

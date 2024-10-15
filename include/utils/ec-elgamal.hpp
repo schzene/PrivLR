@@ -344,8 +344,31 @@ public:
         BN_CTX_free(ctx);
     }
 
-    static void send(IOPack* io_pack, CipherVector* cv);
-    static void recv(IOPack* io_pack, CipherVector* cv);
+    static void send(IOPack* io_pack, CipherVector* cv) {
+        size_t data_size = cv->data.size();
+        io_pack->send_data(&data_size, sizeof(size_t));
+        size_t len = ec_elgamal_get_point_compressed_size()*2;
+        for (size_t i = 0; i < data_size; i++) {
+            unsigned char* buf = new unsigned char[len];
+            encode_ciphertext(buf, cv->data[i]);
+            io_pack->send_data(buf, len);
+            delete[] buf;
+        }
+    }
+
+    static void recv(IOPack* io_pack, CipherVector* cv) {
+        size_t data_size;
+        io_pack->recv_data(&data_size, sizeof(size_t));
+        cv->data.resize(data_size);
+        size_t len = ec_elgamal_get_point_compressed_size()*2;
+        for (size_t i = 0; i < data_size; i++) {
+            cv->data[i] = ec_elgamal_new_ciphertext();
+            unsigned char* buf = new unsigned char[len];
+            io_pack->recv_data(buf, len);
+            decode_ciphertext(cv->data[i], buf);
+            delete[] buf;
+        }
+    }
 };
 }  // namespace EC_Elgamal
 #endif
