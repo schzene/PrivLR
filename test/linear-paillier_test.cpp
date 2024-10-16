@@ -17,6 +17,7 @@ int main(int argc, const char **argv) {
                   << "\n";
     }
     IOPack *io_pack = new IOPack(party_);
+    Linear *linear = new Linear(party_, io_pack);
 
     size_t size = 10;
     size_t data_size = 20;
@@ -28,7 +29,7 @@ int main(int argc, const char **argv) {
         }
         in_b[i] = dist(gen);
     }
-    Linear *linear = new Linear(party_, io_pack);
+
     auto res = linear->dot_product(in_a, in_b, true);
 
     if (party_ == ALICE) {

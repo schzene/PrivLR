@@ -1,5 +1,5 @@
-#ifndef PRIV_LR_PROTOCOL_H__
-#define PRIV_LR_PROTOCOL_H__
+#ifndef PRIV_LR_PROTOCOL_PAILLIER_H__
+#define PRIV_LR_PROTOCOL_PAILLIER_H__
 
 #define BIT_LENGTH 37
 #define SCALE      12

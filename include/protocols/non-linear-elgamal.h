@@ -1,5 +1,5 @@
-#ifndef PRIV_LR_SIGMOID_H__
-#define PRIV_LR_SIGMOID_H__
+#ifndef PRIV_LR_SIGMOID_ELGAMAL_H__
+#define PRIV_LR_SIGMOID_ELGAMAL_H__
 
 #include "protocol-elgamal.h"
 
