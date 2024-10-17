@@ -1,7 +1,7 @@
 add_subdirectory(protocols)
 add_subdirectory(utils)
 
-add_library(PrivLR
+add_library(PrivLR SHARED
     logistic-bfv.cpp
     logistic-paillier.cpp
 )

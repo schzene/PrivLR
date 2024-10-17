@@ -22,7 +22,7 @@ namespace paillier {
         return str;
     }
 
-    void keygen(PublicKey &public_key, PrivateKey &private_key, size_t key_length) {
+    void keygen(PublicKey &public_key, PrivateKey &private_key, const unsigned int key_length) {
         ZZ p, q, phi, n, lambda, mu;
         do {
             p = NTL::GenPrime_ZZ(key_length);

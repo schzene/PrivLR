@@ -22,7 +22,7 @@ if (NOT SEAL_FOUND)
 endif()
 
 
-add_library(PrivLR_UTILS
+add_library(PrivLR_UTILS SHARED
     bfv-tools.cpp
     data.cpp
     ec-elgamal.c

@@ -1,4 +1,4 @@
-add_library(PrivLR_PROTOCOLS
+add_library(PrivLR_PROTOCOLS SHARED
     linear-bfv.cpp
     linear-elgamal.cpp
     linear-paillier.cpp
