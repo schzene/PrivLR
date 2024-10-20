@@ -48,61 +48,59 @@ typedef __m256i block256;
 
 #include <party.h>
 
-const static int NETWORK_BUFFER_SIZE = 1024 * 16; // Should change depending on the network
+const static int NETWORK_BUFFER_SIZE = 1024 * 16;  // Should change depending on the network
 
 template <typename T>
 class IOChannel {
 public:
-    void send_data(const void *data, int nbyte) {
+    void send_data(const void* data, int nbyte) {
         derived().send_data(data, nbyte);
     }
 
-    void recv_data(void *data, int nbyte) {
+    void recv_data(void* data, int nbyte) {
         derived().recv_data(data, nbyte);
     }
 
-    void send_block(const block128 *data, int nblock) {
+    void send_block(const block128* data, int nblock) {
         send_data(data, nblock * sizeof(block128));
     }
 
-    void send_block(const block256 *data, int nblock) {
+    void send_block(const block256* data, int nblock) {
         send_data(data, nblock * sizeof(block256));
     }
 
-    void recv_block(block128 *data, int nblock) {
+    void recv_block(block128* data, int nblock) {
         recv_data(data, nblock * sizeof(block128));
     }
 
 private:
-    T &derived() {
-        return *static_cast<T *>(this);
+    T& derived() {
+        return *static_cast<T*>(this);
     }
 };
 
-enum class LastCall { None,
-                      Send,
-                      Recv };
+enum class LastCall { None, Send, Recv };
 
 class NetIO : public IOChannel<NetIO> {
 public:
     bool is_server;
-    int mysocket = -1;
+    int mysocket  = -1;
     int consocket = -1;
-    FILE *stream = nullptr;
-    char *buffer = nullptr;
+    FILE* stream  = nullptr;
+    char* buffer  = nullptr;
     bool has_sent = false;
     string addr;
     int port;
-    uint64_t counter = 0;
+    uint64_t counter    = 0;
     uint64_t num_rounds = 0;
     bool FBF_mode;
     LastCall last_call = LastCall::None;
 
-    NetIO(const char *address, int port, bool full_buffer = false, bool quiet = false);
+    NetIO(const char* address, int port, bool full_buffer = false, bool quiet = false);
     ~NetIO();
     void sync();
-    void send_data(const void *data, int len, bool count_comm = true);
-    void recv_data(void *data, int len, bool count_comm = true);
+    void send_data(const void* data, int len, bool count_comm = true);
+    void recv_data(void* data, int len, bool count_comm = true);
 
     inline void set_FBF() {
         flush();
@@ -131,13 +129,13 @@ public:
 
 class IOPack {
 public:
-    NetIO *io;
-    NetIO *io_rev;
+    NetIO* io;
+    NetIO* io_rev;
 
     IOPack(int party, std::string address = "127.0.0.1");
     ~IOPack();
-    void send_data(const void *data, int len, bool count_comm = true);
-    void recv_data(void *data, int len, bool count_comm = true);
+    void send_data(const void* data, int len, bool count_comm = true);
+    void recv_data(void* data, int len, bool count_comm = true);
 
     inline uint64_t get_rounds() {
         // no need to count io_rev->num_rounds
@@ -150,7 +148,7 @@ public:
     }
 };
 
-inline void load_party(const string &config_addr, int party, string &address) {
+inline void load_party(const string& config_addr, int party, string& address) {
     std::ifstream in(config_addr);
     in >> party >> address;
 }

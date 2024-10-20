@@ -120,7 +120,8 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         vector<ZZ> r2_fixed = r2_secret_b.decrypt(sk);
 
         for (size_t i = 0; i < size; i++) {
-            r2a_ina[i] = r2a_ina[i] * in[i] * NTL::to_double(r2_fixed[i] % (1ULL << BIT_LENGTH)) / (1ULL << (2 * SCALE));
+            r2a_ina[i] =
+                r2a_ina[i] * in[i] * NTL::to_double(r2_fixed[i] % (1ULL << BIT_LENGTH)) / (1ULL << (2 * SCALE));
         }
 
         return r2a_ina;

@@ -15,11 +15,11 @@ namespace EC_Elgamal {
 class CipherVector {
 public:
     class lenth_error : public std::exception {
-        const char *message;
+        const char* message;
 
     public:
-        lenth_error(const char *msg) : message(msg) {}
-        const char *what() const throw() override {
+        lenth_error(const char* msg) : message(msg) {}
+        const char* what() const throw() override {
             return message;
         }
     };
@@ -87,32 +87,35 @@ public:
 
     CipherVector add(const CipherVector& other) const {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
+        BN_CTX* ctx                = BN_CTX_new();
         CipherVector ret;
-        const size_t this_size = data.size();
+        const size_t this_size  = data.size();
         const size_t other_size = other.data.size();
         if (this_size == 1) {
-            ret.data.resize(other_size); 
+            ret.data.resize(other_size);
             for (size_t i = 0; i < other_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 EC_POINT_add(init_group, ret.data[i]->C1, data[0]->C1, other.data[i]->C1, ctx);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[0]->C2, other.data[i]->C2, ctx);
             }
-        } else if (other_size == 1) {
-            ret.data.resize(this_size); 
+        }
+        else if (other_size == 1) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 EC_POINT_add(init_group, ret.data[i]->C1, data[i]->C1, other.data[0]->C1, ctx);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[i]->C2, other.data[0]->C2, ctx);
             }
-        } else if (this_size == other_size) {
-            ret.data.resize(this_size); 
+        }
+        else if (this_size == other_size) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 EC_POINT_add(init_group, ret.data[i]->C1, data[i]->C1, other.data[i]->C1, ctx);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[i]->C2, other.data[i]->C2, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and CipherVector(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -124,9 +127,9 @@ public:
 
     void add_inplace(const CipherVector& other) {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
-        const size_t this_size = data.size();
-        const size_t other_size = other.data.size();
+        BN_CTX* ctx                = BN_CTX_new();
+        const size_t this_size     = data.size();
+        const size_t other_size    = other.data.size();
         if (this_size == 1) {
             EC_POINT* C1 = EC_POINT_new(init_group);
             EC_POINT_copy(C1, data[0]->C1);
@@ -142,17 +145,20 @@ public:
             }
             EC_POINT_free(C1);
             EC_POINT_free(C2);
-        } else if (other_size == 1) {
+        }
+        else if (other_size == 1) {
             for (size_t i = 0; i < this_size; i++) {
                 EC_POINT_add(init_group, data[i]->C1, data[i]->C1, other.data[0]->C1, ctx);
                 EC_POINT_add(init_group, data[i]->C2, data[i]->C2, other.data[0]->C2, ctx);
             }
-        } else if (this_size == other_size) {
+        }
+        else if (this_size == other_size) {
             for (size_t i = 0; i < this_size; i++) {
                 EC_POINT_add(init_group, data[i]->C1, data[i]->C1, other.data[i]->C1, ctx);
                 EC_POINT_add(init_group, data[i]->C2, data[i]->C2, other.data[i]->C2, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and CipherVector(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -162,14 +168,14 @@ public:
 
     CipherVector add_plain(const vector<uint64_t>& other) const {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
+        BN_CTX* ctx                = BN_CTX_new();
         CipherVector ret;
-        const size_t this_size = data.size();
+        const size_t this_size  = data.size();
         const size_t other_size = other.size();
-        BIGNUM *bn_plain = BN_new();
-        EC_POINT *mG = EC_POINT_new(init_group);
+        BIGNUM* bn_plain        = BN_new();
+        EC_POINT* mG            = EC_POINT_new(init_group);
         if (this_size == 1) {
-            ret.data.resize(other_size); 
+            ret.data.resize(other_size);
             for (size_t i = 0; i < other_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[i]);
@@ -177,8 +183,9 @@ public:
                 EC_POINT_copy(ret.data[i]->C1, data[0]->C1);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[0]->C2, mG, ctx);
             }
-        } else if (other_size == 1) {
-            ret.data.resize(this_size); 
+        }
+        else if (other_size == 1) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[0]);
@@ -186,8 +193,9 @@ public:
                 EC_POINT_copy(ret.data[i]->C1, data[i]->C1);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[i]->C2, mG, ctx);
             }
-        } else if (this_size == other_size) {
-            ret.data.resize(this_size); 
+        }
+        else if (this_size == other_size) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[i]);
@@ -195,7 +203,8 @@ public:
                 EC_POINT_copy(ret.data[i]->C1, data[i]->C1);
                 EC_POINT_add(init_group, ret.data[i]->C2, data[i]->C2, mG, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and Plaintext(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -209,11 +218,11 @@ public:
 
     void add_plain_inplace(const vector<uint64_t>& other) {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
-        const size_t this_size = data.size();
-        const size_t other_size = other.size();
-        BIGNUM *bn_plain = BN_new();
-        EC_POINT *mG = EC_POINT_new(init_group);
+        BN_CTX* ctx                = BN_CTX_new();
+        const size_t this_size     = data.size();
+        const size_t other_size    = other.size();
+        BIGNUM* bn_plain           = BN_new();
+        EC_POINT* mG               = EC_POINT_new(init_group);
         if (this_size == 1) {
             EC_POINT* C1 = EC_POINT_new(init_group);
             EC_POINT_copy(C1, data[0]->C1);
@@ -233,19 +242,22 @@ public:
             }
             EC_POINT_free(C1);
             EC_POINT_free(C2);
-        } else if (other_size == 1) {
+        }
+        else if (other_size == 1) {
             for (size_t i = 0; i < this_size; i++) {
                 BN_set_word(bn_plain, other[0]);
                 EC_POINT_mul(init_group, mG, NULL, EC_GROUP_get0_generator(init_group), bn_plain, ctx);
                 EC_POINT_add(init_group, data[i]->C2, data[i]->C2, mG, ctx);
             }
-        } else if (this_size == other_size) {
+        }
+        else if (this_size == other_size) {
             for (size_t i = 0; i < this_size; i++) {
                 BN_set_word(bn_plain, other[i]);
                 EC_POINT_mul(init_group, mG, NULL, EC_GROUP_get0_generator(init_group), bn_plain, ctx);
                 EC_POINT_add(init_group, data[i]->C2, data[i]->C2, mG, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and Plaintext(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -257,37 +269,40 @@ public:
 
     CipherVector mul_plain(const vector<uint64_t>& other) const {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
+        BN_CTX* ctx                = BN_CTX_new();
         CipherVector ret;
-        const size_t this_size = data.size();
+        const size_t this_size  = data.size();
         const size_t other_size = other.size();
-        BIGNUM *bn_plain = BN_new();
+        BIGNUM* bn_plain        = BN_new();
 
         if (this_size == 1) {
-            ret.data.resize(other_size); 
+            ret.data.resize(other_size);
             for (size_t i = 0; i < other_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[i]);
                 EC_POINT_mul(init_group, ret.data[i]->C1, NULL, data[0]->C1, bn_plain, ctx);
                 EC_POINT_mul(init_group, ret.data[i]->C2, NULL, data[0]->C2, bn_plain, ctx);
             }
-        } else if (other_size == 1) {
-            ret.data.resize(this_size); 
+        }
+        else if (other_size == 1) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[0]);
                 EC_POINT_mul(init_group, ret.data[i]->C1, NULL, data[i]->C1, bn_plain, ctx);
                 EC_POINT_mul(init_group, ret.data[i]->C2, NULL, data[i]->C2, bn_plain, ctx);
             }
-        } else if (this_size == other_size) {
-            ret.data.resize(this_size); 
+        }
+        else if (this_size == other_size) {
+            ret.data.resize(this_size);
             for (size_t i = 0; i < this_size; i++) {
                 ret.data[i] = ec_elgamal_new_ciphertext();
                 BN_set_word(bn_plain, other[i]);
                 EC_POINT_mul(init_group, ret.data[i]->C1, NULL, data[i]->C1, bn_plain, ctx);
                 EC_POINT_mul(init_group, ret.data[i]->C2, NULL, data[i]->C2, bn_plain, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and Plaintext(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -300,10 +315,10 @@ public:
 
     void mul_plain_inplace(const vector<uint64_t>& other) {
         const EC_GROUP* init_group = ec_elgamal_get_group();
-        BN_CTX *ctx = BN_CTX_new();
-        const size_t this_size = data.size();
-        const size_t other_size = other.size();
-        BIGNUM *bn_plain = BN_new();
+        BN_CTX* ctx                = BN_CTX_new();
+        const size_t this_size     = data.size();
+        const size_t other_size    = other.size();
+        BIGNUM* bn_plain           = BN_new();
 
         if (this_size == 1) {
             EC_POINT* C1 = EC_POINT_new(init_group);
@@ -323,19 +338,22 @@ public:
             }
             EC_POINT_free(C1);
             EC_POINT_free(C2);
-        } else if (other_size == 1) {
+        }
+        else if (other_size == 1) {
             for (size_t i = 0; i < this_size; i++) {
                 BN_set_word(bn_plain, other[0]);
                 EC_POINT_mul(init_group, data[i]->C1, NULL, data[i]->C1, bn_plain, ctx);
                 EC_POINT_mul(init_group, data[i]->C2, NULL, data[i]->C2, bn_plain, ctx);
             }
-        } else if (this_size == other_size) {
+        }
+        else if (this_size == other_size) {
             for (size_t i = 0; i < this_size; i++) {
                 BN_set_word(bn_plain, other[i]);
                 EC_POINT_mul(init_group, data[i]->C1, NULL, data[i]->C1, bn_plain, ctx);
                 EC_POINT_mul(init_group, data[i]->C2, NULL, data[i]->C2, bn_plain, ctx);
             }
-        } else {
+        }
+        else {
             char buf[100];
             sprintf(buf, "Length of CipherVector(%ld) and Plaintext(%ld) mismatch", this_size, other_size);
             throw lenth_error(buf);
@@ -347,7 +365,7 @@ public:
     static void send(IOPack* io_pack, CipherVector* cv) {
         size_t data_size = cv->data.size();
         io_pack->send_data(&data_size, sizeof(size_t));
-        size_t len = ec_elgamal_get_point_compressed_size()*2;
+        size_t len = ec_elgamal_get_point_compressed_size() * 2;
         for (size_t i = 0; i < data_size; i++) {
             unsigned char* buf = new unsigned char[len];
             encode_ciphertext(buf, cv->data[i]);
@@ -360,9 +378,9 @@ public:
         size_t data_size;
         io_pack->recv_data(&data_size, sizeof(size_t));
         cv->data.resize(data_size);
-        size_t len = ec_elgamal_get_point_compressed_size()*2;
+        size_t len = ec_elgamal_get_point_compressed_size() * 2;
         for (size_t i = 0; i < data_size; i++) {
-            cv->data[i] = ec_elgamal_new_ciphertext();
+            cv->data[i]        = ec_elgamal_new_ciphertext();
             unsigned char* buf = new unsigned char[len];
             io_pack->recv_data(buf, len);
             decode_ciphertext(cv->data[i], buf);

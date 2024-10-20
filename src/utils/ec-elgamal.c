@@ -36,36 +36,36 @@
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 
-char *point_to_string(EC_GROUP *curve_group, const EC_POINT *point) {
-    BN_CTX *ctx = BN_CTX_new();
-    char *s;
+char* point_to_string(EC_GROUP* curve_group, const EC_POINT* point) {
+    BN_CTX* ctx = BN_CTX_new();
+    char* s;
     point_conversion_form_t form = POINT_CONVERSION_COMPRESSED;
-    s = EC_POINT_point2hex(curve_group, point, form, ctx);
+    s                            = EC_POINT_point2hex(curve_group, point, form, ctx);
     BN_CTX_free(ctx);
     return s;
 }
 
-int add_value_to_table(bsgs_table_t table, EC_POINT *point, uint32_t value) {
+int add_value_to_table(bsgs_table_t table, EC_POINT* point, uint32_t value) {
     unsigned char* point_key;
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx       = BN_CTX_new();
     size_t point_size = EC_POINT_point2oct(table->group, point, POINT_CONVERSION_COMPRESSED, NULL, 0, ctx);
-    bsgs_hash_table_entry_t * new_entry = (bsgs_hash_table_entry_t *) malloc(sizeof(bsgs_hash_table_entry_t));
-    point_key = (unsigned char*) malloc(point_size);
+    bsgs_hash_table_entry_t* new_entry = (bsgs_hash_table_entry_t*)malloc(sizeof(bsgs_hash_table_entry_t));
+    point_key                          = (unsigned char*)malloc(point_size);
     EC_POINT_point2oct(table->group, point, POINT_CONVERSION_COMPRESSED, point_key, point_size, ctx);
 
-    new_entry->key = point_key;
+    new_entry->key   = point_key;
     new_entry->value = value;
     HASH_ADD_KEYPTR(hh, table->table, point_key, point_size, new_entry);
     BN_CTX_free(ctx);
     return 0;
 }
 
-int get_power_from_table(uint64_t *power, const bsgs_table_t bsgs_table, const EC_POINT *lookup_point) {
+int get_power_from_table(uint64_t* power, const bsgs_table_t bsgs_table, const EC_POINT* lookup_point) {
     unsigned char* point_key;
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx       = BN_CTX_new();
     size_t point_size = EC_POINT_point2oct(bsgs_table->group, lookup_point, POINT_CONVERSION_COMPRESSED, NULL, 0, ctx);
-    bsgs_hash_table_entry_t * entry;
-    point_key = (unsigned char*) malloc(point_size);
+    bsgs_hash_table_entry_t* entry;
+    point_key = (unsigned char*)malloc(point_size);
     EC_POINT_point2oct(bsgs_table->group, lookup_point, POINT_CONVERSION_COMPRESSED, point_key, point_size, ctx);
 
     HASH_FIND(hh, bsgs_table->table, point_key, point_size, entry);
@@ -74,17 +74,17 @@ int get_power_from_table(uint64_t *power, const bsgs_table_t bsgs_table, const E
 
     if (entry == NULL)
         return -1;
-    *power = (uint64_t) entry->value;
+    *power = (uint64_t)entry->value;
     return 0;
 }
 
-int ecdlp_bsgs(const bsgs_table_t bsgs_table, const EC_POINT *M, uint64_t *x, int64_t max_it) {
+int ecdlp_bsgs(const bsgs_table_t bsgs_table, const EC_POINT* M, uint64_t* x, int64_t max_it) {
     uint64_t j = 0, i = 0;
     int ok;
-    EC_GROUP *curve_group = bsgs_table->group;
-    EC_POINT *curPoint = EC_POINT_dup(M, curve_group);
-    EC_POINT *curPointNeg = EC_POINT_dup(M, curve_group);
-    BN_CTX *ctx = BN_CTX_new();
+    EC_GROUP* curve_group = bsgs_table->group;
+    EC_POINT* curPoint    = EC_POINT_dup(M, curve_group);
+    EC_POINT* curPointNeg = EC_POINT_dup(M, curve_group);
+    BN_CTX* ctx           = BN_CTX_new();
 
     while (i <= max_it) {
         ok = get_power_from_table(&j, bsgs_table, curPoint);
@@ -107,21 +107,22 @@ int ecdlp_bsgs(const bsgs_table_t bsgs_table, const EC_POINT *M, uint64_t *x, in
 }
 
 // Finds the value x with brute force s.t. M=xG
-int ecdlp_brute(const EC_GROUP *curve_group, const EC_POINT *M, uint64_t *x, uint64_t max_it) {
-    EC_POINT *cur;
-    const EC_POINT *G;
+int ecdlp_brute(const EC_GROUP* curve_group, const EC_POINT* M, uint64_t* x, uint64_t max_it) {
+    EC_POINT* cur;
+    const EC_POINT* G;
     uint64_t max, x_local = 1;
-    BN_CTX *ctx = BN_CTX_new();
-    max = (int64_t) max_it;
+    BN_CTX* ctx = BN_CTX_new();
+    max         = (int64_t)max_it;
 
     cur = EC_POINT_new(curve_group);
-    G = EC_GROUP_get0_generator(curve_group);
+    G   = EC_GROUP_get0_generator(curve_group);
     EC_POINT_set_to_infinity(curve_group, cur);
 
     if (EC_POINT_is_at_infinity(curve_group, M)) {
         *x = 0;
         return 0;
-    } else {
+    }
+    else {
         for (; x_local < max; (*x) = x_local++) {
             EC_POINT_add(curve_group, cur, cur, G, ctx);
             if (EC_POINT_cmp(curve_group, cur, M, ctx) == 0) {
@@ -138,14 +139,14 @@ int ecdlp_brute(const EC_GROUP *curve_group, const EC_POINT *M, uint64_t *x, uin
 // API IMPLEMENTATION
 
 //the ec group used
-EC_GROUP *init_group = NULL;
+EC_GROUP* init_group = NULL;
 
 int ec_elgamal_init(int curve_id) {
     init_group = EC_GROUP_new_by_curve_name(curve_id);
     return 0;
 }
 
-const EC_GROUP *ec_elgamal_get_group() {
+const EC_GROUP* ec_elgamal_get_group() {
     return init_group;
 }
 
@@ -158,19 +159,19 @@ int ec_elgamal_deinit() {
 }
 
 int bsgs_table_init(bsgs_table_t table, uint64_t t_size) {
-    uint64_t count = 0;
-    BIGNUM *bn_size = BN_new();
-    EC_POINT *cur_point = EC_POINT_new(init_group);
-    const EC_POINT *gen = EC_GROUP_get0_generator(init_group);
-    BN_CTX *ctx = BN_CTX_new();
+    uint64_t count      = 0;
+    BIGNUM* bn_size     = BN_new();
+    EC_POINT* cur_point = EC_POINT_new(init_group);
+    const EC_POINT* gen = EC_GROUP_get0_generator(init_group);
+    BN_CTX* ctx         = BN_CTX_new();
 
-    table->table = NULL;
-    table->group = init_group;
-    table->mG = EC_POINT_new(init_group);
+    table->table  = NULL;
+    table->group  = init_group;
+    table->mG     = EC_POINT_new(init_group);
     table->mG_inv = EC_POINT_new(init_group);
 
     //set Table metadata
-    BN_set_word(bn_size,  (BN_ULONG) t_size);
+    BN_set_word(bn_size, (BN_ULONG)t_size);
     table->tablesize = t_size;
     EC_POINT_mul(init_group, table->mG, NULL, gen, bn_size, ctx);
     BN_set_negative(bn_size, 1);
@@ -202,8 +203,8 @@ int bsgs_table_free(bsgs_table_t bsgs_table) {
 
 ec_elgamal_secret_key ec_elgamal_keygen() {
     ec_elgamal_secret_key sk = BN_new();
-    BN_CTX *ctx = BN_CTX_new();
-    BIGNUM *ord = BN_new();
+    BN_CTX* ctx              = BN_CTX_new();
+    BIGNUM* ord              = BN_new();
     EC_GROUP_get_order(init_group, ord, ctx);
     BN_rand_range(sk, ord);
     BN_free(ord);
@@ -213,7 +214,7 @@ ec_elgamal_secret_key ec_elgamal_keygen() {
 
 ec_elgamal_public_key ec_elgamal_from_secret_key(const ec_elgamal_secret_key sk) {
     ec_elgamal_public_key pk = EC_POINT_new(init_group);
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx              = BN_CTX_new();
     EC_POINT_mul(init_group, pk, NULL, EC_GROUP_get0_generator(init_group), sk, ctx);
     BN_CTX_free(ctx);
     return pk;
@@ -234,9 +235,9 @@ int ec_elgamal_free_secret_key(ec_elgamal_secret_key key) {
 }
 
 ec_elgamal_ciphertext* ec_elgamal_new_ciphertext() {
-    ec_elgamal_ciphertext* ciphertext = (ec_elgamal_ciphertext*) malloc(sizeof(ec_elgamal_ciphertext));
-    ciphertext->C1 = EC_POINT_new(init_group);
-    ciphertext->C2 = EC_POINT_new(init_group);
+    ec_elgamal_ciphertext* ciphertext = (ec_elgamal_ciphertext*)malloc(sizeof(ec_elgamal_ciphertext));
+    ciphertext->C1                    = EC_POINT_new(init_group);
+    ciphertext->C2                    = EC_POINT_new(init_group);
     return ciphertext;
 }
 
@@ -251,7 +252,7 @@ int ec_elgamal_free_ciphertext(ec_elgamal_ciphertext* ciphertext) {
 }
 
 int ec_elgamal_encrypt(ec_elgamal_ciphertext* ciphertext, const ec_elgamal_public_key pk, const uint64_t plaintext) {
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx      = BN_CTX_new();
     BIGNUM *bn_plain = BN_new(), *ord = BN_new(), *rand = BN_new();
 
     EC_GROUP_get_order(init_group, ord, ctx);
@@ -270,10 +271,11 @@ int ec_elgamal_encrypt(ec_elgamal_ciphertext* ciphertext, const ec_elgamal_publi
 }
 
 // if table == NULL use bruteforce
-int ec_elgamal_decrypt(uint64_t *res, const ec_elgamal_secret_key sk, const ec_elgamal_ciphertext* ciphertext, bsgs_table_t table) {
-    EC_POINT *M = EC_POINT_new(init_group);
+int ec_elgamal_decrypt(uint64_t* res, const ec_elgamal_secret_key sk, const ec_elgamal_ciphertext* ciphertext,
+                       bsgs_table_t table) {
+    EC_POINT* M = EC_POINT_new(init_group);
     uint64_t plaintext;
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx = BN_CTX_new();
 
     EC_POINT_mul(init_group, M, NULL, ciphertext->C1, sk, ctx);
     EC_POINT_invert(init_group, M, ctx);
@@ -281,19 +283,20 @@ int ec_elgamal_decrypt(uint64_t *res, const ec_elgamal_secret_key sk, const ec_e
 
     if (table != NULL) {
         ecdlp_bsgs(table, M, &plaintext, 1L << MAX_BITS);
-    } else {
+    }
+    else {
         ecdlp_brute(init_group, M, &plaintext, 1L << MAX_BITS);
     }
-    *res = (uint64_t) plaintext;
+    *res = (uint64_t)plaintext;
 
     BN_CTX_free(ctx);
     EC_POINT_clear_free(M);
     return 0;
 }
 
-
-int ec_elgamal_add(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext1, const ec_elgamal_ciphertext* ciphertext2) {
-    BN_CTX *ctx = BN_CTX_new();
+int ec_elgamal_add(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext1,
+                   const ec_elgamal_ciphertext* ciphertext2) {
+    BN_CTX* ctx = BN_CTX_new();
     EC_POINT_add(init_group, res->C1, ciphertext1->C1, ciphertext2->C1, ctx);
     EC_POINT_add(init_group, res->C2, ciphertext1->C2, ciphertext2->C2, ctx);
     BN_CTX_free(ctx);
@@ -301,7 +304,7 @@ int ec_elgamal_add(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciph
 }
 
 int ec_elgamal_add_inplace(ec_elgamal_ciphertext* ciphertext1, const ec_elgamal_ciphertext* ciphertext2) {
-    BN_CTX *ctx = BN_CTX_new();
+    BN_CTX* ctx = BN_CTX_new();
     EC_POINT_add(init_group, ciphertext1->C1, ciphertext1->C1, ciphertext2->C1, ctx);
     EC_POINT_add(init_group, ciphertext1->C2, ciphertext1->C2, ciphertext2->C2, ctx);
     BN_CTX_free(ctx);
@@ -309,11 +312,11 @@ int ec_elgamal_add_inplace(ec_elgamal_ciphertext* ciphertext1, const ec_elgamal_
 }
 
 int ec_elgamal_add_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext, const uint64_t m) {
-    BN_CTX *ctx = BN_CTX_new();
-    BIGNUM *bn_plain = BN_new();
+    BN_CTX* ctx      = BN_CTX_new();
+    BIGNUM* bn_plain = BN_new();
     BN_set_word(bn_plain, m);
 
-    EC_POINT *mG = EC_POINT_new(init_group);
+    EC_POINT* mG = EC_POINT_new(init_group);
     EC_POINT_mul(init_group, mG, NULL, EC_GROUP_get0_generator(init_group), bn_plain, ctx);
     EC_POINT_copy(res->C1, ciphertext->C1);
     EC_POINT_add(init_group, res->C2, ciphertext->C2, mG, ctx);
@@ -325,11 +328,11 @@ int ec_elgamal_add_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext
 }
 
 int ec_elgamal_add_plain_inplace(ec_elgamal_ciphertext* ciphertext, const uint64_t m) {
-    BN_CTX *ctx = BN_CTX_new();
-    BIGNUM *bn_plain = BN_new();
+    BN_CTX* ctx      = BN_CTX_new();
+    BIGNUM* bn_plain = BN_new();
     BN_set_word(bn_plain, m);
 
-    EC_POINT *mG = EC_POINT_new(init_group);
+    EC_POINT* mG = EC_POINT_new(init_group);
     EC_POINT_mul(init_group, mG, NULL, EC_GROUP_get0_generator(init_group), bn_plain, ctx);
     EC_POINT_add(init_group, ciphertext->C2, ciphertext->C2, mG, ctx);
 
@@ -340,8 +343,8 @@ int ec_elgamal_add_plain_inplace(ec_elgamal_ciphertext* ciphertext, const uint64
 }
 
 int ec_elgamal_mul_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext, const uint64_t m) {
-    BN_CTX *ctx = BN_CTX_new();
-    BIGNUM *bn_plain = BN_new();
+    BN_CTX* ctx      = BN_CTX_new();
+    BIGNUM* bn_plain = BN_new();
     BN_set_word(bn_plain, m);
 
     EC_POINT_mul(init_group, res->C1, NULL, ciphertext->C1, bn_plain, ctx);
@@ -354,8 +357,8 @@ int ec_elgamal_mul_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext
 }
 
 int ec_elgamal_mul_plain_inplace(ec_elgamal_ciphertext* ciphertext, const uint64_t m) {
-    BN_CTX *ctx = BN_CTX_new();
-    BIGNUM *bn_plain = BN_new();
+    BN_CTX* ctx      = BN_CTX_new();
+    BIGNUM* bn_plain = BN_new();
     BN_set_word(bn_plain, m);
 
     EC_POINT_mul(init_group, ciphertext->C1, NULL, ciphertext->C1, bn_plain, ctx);
@@ -367,40 +370,39 @@ int ec_elgamal_mul_plain_inplace(ec_elgamal_ciphertext* ciphertext, const uint64
     return 0;
 }
 
-EC_GROUP *ec_elgamal_get_current_group() {
+EC_GROUP* ec_elgamal_get_current_group() {
     return init_group;
 }
 
 int ec_elgamal_get_point_compressed_size() {
-    BN_CTX *ctx = BN_CTX_new();
-    int res = (int) EC_POINT_point2oct(init_group, EC_GROUP_get0_generator(init_group),
-                              POINT_CONVERSION_COMPRESSED, NULL, 0, ctx);
+    BN_CTX* ctx = BN_CTX_new();
+    int res     = (int)EC_POINT_point2oct(init_group, EC_GROUP_get0_generator(init_group), POINT_CONVERSION_COMPRESSED,
+                                          NULL, 0, ctx);
     BN_CTX_free(ctx);
     return res;
 }
 
-
 // ENCODING + DECODING
 
-void write_size(unsigned char *buffer, size_t size) {
-    buffer[0] = (unsigned char) ((size >> 8) & 0xFF);
-    buffer[1] = (unsigned char) (size & 0xFF);
+void write_size(unsigned char* buffer, size_t size) {
+    buffer[0] = (unsigned char)((size >> 8) & 0xFF);
+    buffer[1] = (unsigned char)(size & 0xFF);
 }
 
-size_t read_size(unsigned char *buffer) {
-    return ((uint8_t) buffer[0] << 8) | ((uint8_t) buffer[1]);
+size_t read_size(unsigned char* buffer) {
+    return ((uint8_t)buffer[0] << 8) | ((uint8_t)buffer[1]);
 }
 
 size_t get_encoded_ciphertext_size(ec_elgamal_ciphertext* ciphertext) {
-    return (size_t) ec_elgamal_get_point_compressed_size()*2;
+    return (size_t)ec_elgamal_get_point_compressed_size() * 2;
 }
 
-int encode_ciphertext(unsigned char *buff, ec_elgamal_ciphertext* ciphertext) {
-    unsigned char *cur_ptr = buff;
+int encode_ciphertext(unsigned char* buff, ec_elgamal_ciphertext* ciphertext) {
+    unsigned char* cur_ptr = buff;
     size_t len_point, tmp;
-    BN_CTX *ctx = BN_CTX_new();
-    len_point = (size_t) ec_elgamal_get_point_compressed_size();
-    tmp = EC_POINT_point2oct(init_group, ciphertext->C1, POINT_CONVERSION_COMPRESSED, cur_ptr, len_point, ctx);
+    BN_CTX* ctx = BN_CTX_new();
+    len_point   = (size_t)ec_elgamal_get_point_compressed_size();
+    tmp         = EC_POINT_point2oct(init_group, ciphertext->C1, POINT_CONVERSION_COMPRESSED, cur_ptr, len_point, ctx);
     cur_ptr += len_point;
     if (tmp != len_point)
         return -1;
@@ -411,11 +413,11 @@ int encode_ciphertext(unsigned char *buff, ec_elgamal_ciphertext* ciphertext) {
     return 0;
 }
 
-int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char *buff) {
+int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char* buff) {
     size_t len_point;
-    BN_CTX *ctx = BN_CTX_new();
-    unsigned char *cur_ptr = buff;
-    len_point = (size_t) ec_elgamal_get_point_compressed_size();
+    BN_CTX* ctx            = BN_CTX_new();
+    unsigned char* cur_ptr = buff;
+    len_point              = (size_t)ec_elgamal_get_point_compressed_size();
 
     EC_POINT_oct2point(init_group, ciphertext->C1, cur_ptr, len_point, ctx);
     cur_ptr += len_point;

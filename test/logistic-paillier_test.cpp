@@ -5,7 +5,7 @@ int num_iter = 25;
 
 INIT_TIMER
 
-void load_dataset_base(vector<vector<double>> &datas, vector<int> &label, const string &filename) {
+void load_dataset_base(vector<vector<double>>& datas, vector<int>& label, const string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;
@@ -26,7 +26,7 @@ void load_dataset_base(vector<vector<double>> &datas, vector<int> &label, const 
     }
 }
 
-double scalarProduct(const vector<double> &w, const vector<double> &x) {
+double scalarProduct(const vector<double>& w, const vector<double>& x) {
     double ret = 0.0;
     for (int i = 0; i < w.size(); i++) {
         ret += w[i] * x[i];
@@ -34,11 +34,11 @@ double scalarProduct(const vector<double> &w, const vector<double> &x) {
     return ret;
 }
 
-inline double sigmoid(const double &z) {
+inline double sigmoid(const double& z) {
     return 1 / (1 + exp(-z));
 }
 
-vector<vector<double>> matTranspose(vector<vector<double>> &dataMat) {
+vector<vector<double>> matTranspose(vector<vector<double>>& dataMat) {
     vector<vector<double>> ret(dataMat[0].size(), vector<double>(dataMat.size(), 0));
     for (int i = 0; i < ret.size(); i++)
         for (int j = 0; j < ret[0].size(); j++)
@@ -46,15 +46,15 @@ vector<vector<double>> matTranspose(vector<vector<double>> &dataMat) {
     return ret;
 }
 
-void gradAscent(vector<double> &weight,
-                vector<vector<double>> &dataMat, vector<int> &labelMat, int maxCycles = 1000, double alpha = 0.01) {
-    const size_t data_size = dataMat.size();
+void gradAscent(vector<double>& weight, vector<vector<double>>& dataMat, vector<int>& labelMat, int maxCycles = 1000,
+                double alpha = 0.01) {
+    const size_t data_size          = dataMat.size();
     vector<vector<double>> dataMatT = matTranspose(dataMat);
     while (maxCycles > 0) {
         vector<double> h;
         vector<double> error;
         double sum_err = 0;
-        for (auto &data : dataMat)
+        for (auto& data : dataMat)
             h.push_back(sigmoid(scalarProduct(data, weight)));
         for (int i = 0; i < labelMat.size(); i++) {
             double dist = labelMat[i] - h[i];
@@ -73,12 +73,11 @@ void gradAscent(vector<double> &weight,
     }
 }
 
-inline int classify(vector<double> &data, vector<double> &weights) {
+inline int classify(vector<double>& data, vector<double>& weights) {
     return sigmoid(scalarProduct(data, weights)) > 0.5 ? 1 : 0;
 }
 
-double testResult(vector<vector<double>> &testDataMat,
-                  vector<int> &testDataLabel, vector<double> &weight) {
+double testResult(vector<vector<double>>& testDataMat, vector<int>& testDataLabel, vector<double>& weight) {
     double errCount = 0.0;
     double dataSize = testDataMat.size();
     for (int i = 0; i < dataSize; i++)
@@ -88,7 +87,9 @@ double testResult(vector<vector<double>> &testDataMat,
 }
 
 void testPlaintext() {
-    std::cout << "**************************************************\n" << "testPlaintext(Base)\n" << "**************************************************\n";
+    std::cout << "**************************************************\n"
+              << "testPlaintext(Base)\n"
+              << "**************************************************\n";
     vector<vector<double>> base_train_mat;
     vector<int> base_train_label;
     // string base_train_file("/data/PrivLR/ACAD");
@@ -113,22 +114,25 @@ void testPlaintext() {
     std::cout << "**************************************************\n\n";
 }
 
-void PrivLR_test(int &party) {
-    std::cout << "**************************************************\n" << "PrivLR_test:\n" << "**************************************************\n";
+void PrivLR_test(int& party) {
+    std::cout << "**************************************************\n"
+              << "PrivLR_test:\n"
+              << "**************************************************\n";
     string train_file, test_file;
     if (party == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
         train_file = "/data/PrivLR/WIBC_alice";
-        test_file = "/data/PrivLR/WIBC_alice_test";
-    } else {
+        test_file  = "/data/PrivLR/WIBC_alice_test";
+    }
+    else {
         party = BOB;
         std::cout << "Party: BOB"
                   << "\n";
         train_file = "/data/PrivLR/WIBC_bob";
-        test_file = "/data/PrivLR/WIBC_bob_test";
+        test_file  = "/data/PrivLR/WIBC_bob_test";
     }
-    IOPack *io_pack = new IOPack(party);
+    IOPack* io_pack = new IOPack(party);
 
     vector<vector<double>> train_mat, test_mat;
     vector<int> train_label, test_label;
@@ -136,30 +140,34 @@ void PrivLR_test(int &party) {
     load_dataset(test_mat, test_label, test_file);
     const size_t size = train_mat[0].size();
 
-    Logistic *logistic = new Logistic(party, io_pack);
+    Logistic* logistic = new Logistic(party, io_pack);
     START_TIMER
     logistic->gradAscent(train_mat, train_label, num_iter, 0.008);
     STOP_TIMER("train")
 
-    size_t comm = io_pack->get_comm();
+    size_t comm   = io_pack->get_comm();
     size_t rounds = io_pack->get_rounds();
     if (comm < 1024) {
         printf("data size of communication: %ld B\n", comm);
-    } else if (comm < 1024 * 1024) {
+    }
+    else if (comm < 1024 * 1024) {
         printf("data size of communication: %.2lf KB\n", comm / 1024.);
-    } else if (comm < 1024 * 1024 * 1024) {
+    }
+    else if (comm < 1024 * 1024 * 1024) {
         printf("data size of communication: %.2lf MB\n", comm / (1024. * 1024.));
-    } else {
+    }
+    else {
         printf("data size of communication: %.2lf MB\n", comm / (1024. * 1024. * 1024.));
     }
     std::cout << "rounds of communication: " << rounds << "\n";
 
-    size_t test_size = test_mat.size();
+    size_t test_size      = test_mat.size();
     vector<double> result = logistic->classify(test_mat);
     if (party == BOB) {
         io_pack->send_data(result.data(), sizeof(double) * test_size);
         io_pack->send_data(test_label.data(), sizeof(int) * test_size);
-    } else {
+    }
+    else {
         vector<double> result_remote(test_size);
         vector<int> test_label_remote(test_size);
         io_pack->recv_data(result_remote.data(), sizeof(double) * test_size);
@@ -180,7 +188,7 @@ void PrivLR_test(int &party) {
     std::cout << "**************************************************\n\n";
 }
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
     int party = argv[1][0] - '0';
     PrivLR_test(party);
     if (party == BOB) {

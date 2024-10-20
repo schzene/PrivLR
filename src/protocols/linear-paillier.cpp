@@ -36,8 +36,10 @@ double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_
         paillier::Ciphertext res_part1_sec(res_part1_sec_zz), res_part2_sec(res_part2_sec_zz);
         uint64_t res_part1_ring = NTL::conv<uint64_t>(decrypt(res_part1_sec, sk) % (1ULL << BIT_LENGTH)),
                  res_part2_ring = NTL::conv<uint64_t>(decrypt(res_part2_sec, sk) % (1ULL << BIT_LENGTH));
-        int64_t res_part1 = (res_part1_ring >= (1ULL << BIT_LENGTH) / 2) ? (res_part1_ring - (1ULL << BIT_LENGTH)) : res_part1_ring,
-                res_part2 = (res_part2_ring >= (1ULL << BIT_LENGTH) / 2) ? (res_part2_ring - (1ULL << BIT_LENGTH)) : res_part2_ring;
+        int64_t res_part1 = (res_part1_ring >= (1ULL << BIT_LENGTH) / 2) ? (res_part1_ring - (1ULL << BIT_LENGTH)) :
+                                                                           res_part1_ring,
+                res_part2 = (res_part2_ring >= (1ULL << BIT_LENGTH) / 2) ? (res_part2_ring - (1ULL << BIT_LENGTH)) :
+                                                                           res_part2_ring;
         res += (res_part1 + res_part2) * 1. / (1ULL << (2 * SCALE));
     }
     else {
@@ -48,8 +50,7 @@ double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_
         in_a_secret_a.mul_plain_inplace(in_b_ring);
         in_b_secret_a.mul_plain_inplace(in_a_ring);
 
-        ZZ res_part1_sec_a = in_a_secret_a.data[0], 
-           res_part2_sec_a = in_b_secret_a.data[0],
+        ZZ res_part1_sec_a = in_a_secret_a.data[0], res_part2_sec_a = in_b_secret_a.data[0],
            n_square = in_a_secret_a.public_key.n * in_a_secret_a.public_key.n;
         for (size_t i = 1; i < size; i++) {
             res_part1_sec_a = (res_part1_sec_a * in_a_secret_a.data[i]) % n_square;
@@ -59,10 +60,10 @@ double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_
         ZZ res_part1_ring = ZZ(static_cast<uint64_t>(res_part1 * (1ULL << (2 * SCALE))) % (1ULL << BIT_LENGTH)),
            res_part2_ring = ZZ(static_cast<uint64_t>(res_part2 * (1ULL << (2 * SCALE))) % (1ULL << BIT_LENGTH));
 
-        paillier::Ciphertext res_part1_sec = encrypt(res_part1_ring, in_a_secret_a.public_key), 
+        paillier::Ciphertext res_part1_sec = encrypt(res_part1_ring, in_a_secret_a.public_key),
                              res_part2_sec = encrypt(res_part2_ring, in_a_secret_a.public_key);
-        res_part1_sec_a = (res_part1_sec_a * res_part1_sec.data) % n_square;
-        res_part2_sec_a = (res_part2_sec_a * res_part2_sec.data) % n_square;
+        res_part1_sec_a                    = (res_part1_sec_a * res_part1_sec.data) % n_square;
+        res_part2_sec_a                    = (res_part2_sec_a * res_part2_sec.data) % n_square;
         res -= (res_part1 + res_part2);
 
         string res_part1_sec_a_str = ZZ2string(res_part1_sec_a), res_part2_sec_a_str = ZZ2string(res_part2_sec_a);
@@ -100,7 +101,7 @@ vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vec
     vector<ZZ> in_a_flatten_ring(data_size * size), in_b_ring(data_size * size);
     for (size_t j = 0; j < size; j++) {
         for (size_t i = 0; i < data_size; i++) {
-            res[i] += in_a_flatten[i * size + j] * in_b[j];      
+            res[i] += in_a_flatten[i * size + j] * in_b[j];
             in_a_flatten_ring[i * size + j] =
                 ZZ(static_cast<uint64_t>(in_a_flatten[i * size + j] * (1ULL << SCALE)) % (1ULL << BIT_LENGTH));
         }
@@ -120,14 +121,12 @@ vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vec
         for (size_t i = 0; i < data_size; i++) {
             res_part1_ring[i] = res_part1_ring[i] % (1ULL << BIT_LENGTH);
             res_part2_ring[i] = res_part2_ring[i] % (1ULL << BIT_LENGTH);
-            res_part1[i] =
-                NTL::conv<int64_t>((res_part1_ring[i] >= ((1ULL << BIT_LENGTH) / 2)) ?
-                                       (res_part1_ring[i] - ((1ULL << BIT_LENGTH))) :
-                                       res_part1_ring[i]);
-            res_part2[i] =
-                NTL::conv<int64_t>((res_part2_ring[i] >= ((1ULL << BIT_LENGTH) / 2)) ?
-                                       (res_part2_ring[i] - ((1ULL << BIT_LENGTH))) :
-                                       res_part2_ring[i]);
+            res_part1[i]      = NTL::conv<int64_t>((res_part1_ring[i] >= ((1ULL << BIT_LENGTH) / 2)) ?
+                                                       (res_part1_ring[i] - ((1ULL << BIT_LENGTH))) :
+                                                       res_part1_ring[i]);
+            res_part2[i]      = NTL::conv<int64_t>((res_part2_ring[i] >= ((1ULL << BIT_LENGTH) / 2)) ?
+                                                       (res_part2_ring[i] - ((1ULL << BIT_LENGTH))) :
+                                                       res_part2_ring[i]);
             res[i] += (res_part1[i] + res_part2[i]) * 1. / (1ULL << (2 * SCALE));
         }
     }
@@ -141,7 +140,7 @@ vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vec
         vector<ZZ> in_b_flatten_ring(data_size * size);
         for (size_t i = 0; i < data_size; i++) {
             for (size_t j = 0; j < size; j++) {
-                in_b_flatten_ring[i * size + j] = in_b_ring[j];
+                in_b_flatten_ring[i * size + j]  = in_b_ring[j];
                 in_b_secret_a.data[i * size + j] = in_b_sec_a_compressed.data[j];
             }
         }
@@ -167,8 +166,8 @@ vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vec
         CipherVector res_part1_secret_a, res_part2_secret_a;
         res_part1_secret_a.public_key = in_a_secret_a.public_key;
         res_part2_secret_a.public_key = in_b_secret_a.public_key;
-        res_part1_secret_a.data = vector<ZZ>(data_size, ZZ(1));
-        res_part2_secret_a.data = vector<ZZ>(data_size, ZZ(1));
+        res_part1_secret_a.data       = vector<ZZ>(data_size, ZZ(1));
+        res_part2_secret_a.data       = vector<ZZ>(data_size, ZZ(1));
         for (size_t i = 0; i < data_size; i++) {
             for (size_t j = 0; j < size; j++) {
                 res_part1_secret_a.data[i] = (res_part1_secret_a.data[i] * in_a_secret_a.data[i * size + j]) % n_square;

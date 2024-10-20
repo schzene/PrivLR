@@ -1,7 +1,7 @@
 #include <protocols/non-linear-paillier.h>
 using namespace PrivLR_Paillier;
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -12,14 +12,15 @@ int main(int argc, const char **argv) {
     if (party_ == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
-    } else {
+    }
+    else {
         party_ = BOB;
         std::cout << "Party: BOB"
                   << "\n";
     }
-    IOPack *io_pack = new IOPack(party_);
+    IOPack* io_pack = new IOPack(party_);
 
-    NonLinear *non_linear = new NonLinear(party_, io_pack);
+    NonLinear* non_linear = new NonLinear(party_, io_pack);
     vector<double> in(size), in_remote(size);
     for (size_t i = 0; i < size; i++) {
         in[i] = dist(gen);

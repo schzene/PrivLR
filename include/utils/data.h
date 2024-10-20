@@ -10,6 +10,6 @@
 using std::string;
 using std::vector;
 
-void load_dataset(vector<vector<double>> &datas, vector<int> &label, const string &filename);
+void load_dataset(vector<vector<double>>& datas, vector<int>& label, const string& filename);
 
 #endif

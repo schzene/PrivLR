@@ -1,7 +1,7 @@
 #include <protocols/linear-bfv.h>
 using namespace PrivLR_BFV;
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -10,16 +10,17 @@ int main(int argc, const char **argv) {
     if (party_ == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
-    } else {
+    }
+    else {
         party_ = BOB;
         std::cout << "Party: BOB"
                   << "\n";
     }
-    IOPack *io_pack = new IOPack(party_);
-    BFVParm *parm = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
-    BFVKey *party = new BFVKey(party_, parm);
+    IOPack* io_pack = new IOPack(party_);
+    BFVParm* parm   = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
+    BFVKey* party   = new BFVKey(party_, parm);
 
-    size_t size = 10;
+    size_t size      = 10;
     size_t data_size = 20;
     vector<vector<double>> in_a(size, vector<double>(data_size));
     vector<double> in_b(size);
@@ -29,8 +30,8 @@ int main(int argc, const char **argv) {
         }
         in_b[i] = dist(gen);
     }
-    Linear *linear = new Linear(party, io_pack);
-    auto res = linear->dot_product(in_a, in_b, true);
+    Linear* linear = new Linear(party, io_pack);
+    auto res       = linear->dot_product(in_a, in_b, true);
 
     if (party_ == ALICE) {
         for (size_t i = 0; i < in_a.size(); i++) {
@@ -38,7 +39,8 @@ int main(int argc, const char **argv) {
         }
         io_pack->send_data(in_b.data(), sizeof(double) * size);
         io_pack->send_data(res.data(), sizeof(double) * data_size);
-    } else {
+    }
+    else {
         vector<double> res_a(data_size), true_res(data_size);
         vector<vector<double>> in_a_a(size, vector<double>(data_size));
         vector<double> in_b_a(size);
@@ -52,12 +54,14 @@ int main(int argc, const char **argv) {
                 true_res[j] += (in_a[i][j] + in_a_a[i][j]) * (in_b[i] + in_b_a[i]);
             }
         }
-        std::cout << "true_res: " << "\n";
+        std::cout << "true_res: "
+                  << "\n";
         for (size_t j = 0; j < data_size; j++) {
             cout << true_res[j] << "\n";
         }
 
-        std::cout << "res: " << "\n";
+        std::cout << "res: "
+                  << "\n";
         for (size_t j = 0; j < data_size; j++) {
             cout << res[j] + res_a[j] << "\n";
         }

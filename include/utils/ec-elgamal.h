@@ -53,8 +53,8 @@ int ec_elgamal_free_public_key(ec_elgamal_public_key key);
 int ec_elgamal_free_secret_key(ec_elgamal_secret_key key);
 
 typedef struct {
-    EC_POINT *C1;
-    EC_POINT *C2;
+    EC_POINT* C1;
+    EC_POINT* C2;
 } ec_elgamal_ciphertext;
 
 ec_elgamal_ciphertext* ec_elgamal_new_ciphertext();
@@ -64,23 +64,23 @@ int encode_ciphertext(unsigned char* buff, ec_elgamal_ciphertext* ciphertext);
 int decode_ciphertext(ec_elgamal_ciphertext* ciphertext, unsigned char* buff);
 
 typedef struct bsgs_hash_table_entry {
-    unsigned char *key;
+    unsigned char* key;
     uint32_t value;
     UT_hash_handle hh;
 } bsgs_hash_table_entry_t;
 
 struct bsgs_table_s {
-    bsgs_hash_table_entry_t *table;
-    EC_POINT *mG;
-    EC_POINT *mG_inv;
-    EC_GROUP *group;
+    bsgs_hash_table_entry_t* table;
+    EC_POINT* mG;
+    EC_POINT* mG_inv;
+    EC_GROUP* group;
     uint64_t tablesize;
 };
-typedef struct bsgs_table_s *bsgs_table_ptr;
+typedef struct bsgs_table_s* bsgs_table_ptr;
 typedef struct bsgs_table_s bsgs_table_t[1];
 
-int ecdlp_bsgs(const bsgs_table_t bsgs_table, const EC_POINT *M, uint64_t *x, int64_t max_it);
-int ecdlp_brute(const EC_GROUP *curve_group, const EC_POINT *M, uint64_t *x, uint64_t max_it);
+int ecdlp_bsgs(const bsgs_table_t bsgs_table, const EC_POINT* M, uint64_t* x, int64_t max_it);
+int ecdlp_brute(const EC_GROUP* curve_group, const EC_POINT* M, uint64_t* x, uint64_t max_it);
 
 /**
  * Inits the library with the given curve
@@ -89,7 +89,7 @@ int ecdlp_brute(const EC_GROUP *curve_group, const EC_POINT *M, uint64_t *x, uin
  */
 int ec_elgamal_init(int curve_id);
 
-const EC_GROUP *ec_elgamal_get_group();
+const EC_GROUP* ec_elgamal_get_group();
 
 /**
  * Deinits the library
@@ -128,7 +128,7 @@ ec_elgamal_public_key ec_elgamal_from_secret_key(const ec_elgamal_secret_key sk)
 /**
  * Returns the EC_Group (elliptic curve group) struct if initialized
  */
-EC_GROUP *ec_elgamal_get_current_group();
+EC_GROUP* ec_elgamal_get_current_group();
 
 /**
  * Returns the encded size of an EC-Point in this group.
@@ -152,7 +152,8 @@ int ec_elgamal_encrypt(ec_elgamal_ciphertext* ciphertext, const ec_elgamal_publi
  * @param table if NULL bruteforce is used
  * @return
  */
-int ec_elgamal_decrypt(uint64_t *res, const ec_elgamal_secret_key sk, const ec_elgamal_ciphertext* ciphertext, bsgs_table_t table);
+int ec_elgamal_decrypt(uint64_t* res, const ec_elgamal_secret_key sk, const ec_elgamal_ciphertext* ciphertext,
+                       bsgs_table_t table);
 
 /**
  * Adds two EC-Elgamal ciphertext and stores it in res.
@@ -161,7 +162,8 @@ int ec_elgamal_decrypt(uint64_t *res, const ec_elgamal_secret_key sk, const ec_e
  * @param ciphertext2
  * @return
  */
-int ec_elgamal_add(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext1, const ec_elgamal_ciphertext* ciphertext2);
+int ec_elgamal_add(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext1,
+                   const ec_elgamal_ciphertext* ciphertext2);
 
 /**
  * Adds two EC-Elgamal ciphertext and stores it in ciphertext1.
@@ -179,7 +181,6 @@ int ec_elgamal_add_inplace(ec_elgamal_ciphertext* ciphertext1, const ec_elgamal_
  * @return
  */
 int ec_elgamal_add_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext* ciphertext, const uint64_t m);
-
 
 /**
  * Adds EC-Elgamal ciphertext and plaintext, and stores it in ciphertext.
@@ -206,4 +207,4 @@ int ec_elgamal_mul_plain(ec_elgamal_ciphertext* res, const ec_elgamal_ciphertext
  */
 int ec_elgamal_mul_plain_inplace(ec_elgamal_ciphertext* ciphertext, const uint64_t m);
 
-#endif // PRIV_LR_ECELGAMAL_H
+#endif  // PRIV_LR_ECELGAMAL_H
