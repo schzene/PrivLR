@@ -1,4 +1,5 @@
 #include <protocols/non-linear-paillier.h>
+
 using namespace PrivLR_Paillier;
 
 int main(int argc, const char** argv) {

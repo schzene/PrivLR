@@ -3,8 +3,6 @@
 using namespace PrivLR_BFV;
 int num_iter = 25;
 
-INIT_TIMER
-
 void load_dataset_base(vector<vector<double>>& datas, vector<int>& label, const string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -87,6 +85,7 @@ double testResult(vector<vector<double>>& testDataMat, vector<int>& testDataLabe
 }
 
 void testPlaintext() {
+    INIT_TIMER
     std::cout << "**************************************************\n"
               << "testPlaintext(Base)\n"
               << "**************************************************\n";
@@ -132,7 +131,7 @@ void PrivLR_test(int& _party) {
         train_file = "/data/PrivLR/WIBC_bob";
         test_file  = "/data/PrivLR/WIBC_bob_test";
     }
-    BFVParm* parm   = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
+    BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(29));
     BFVKey* party   = new BFVKey(_party, parm);
     IOPack* io_pack = new IOPack(_party);
 
@@ -143,9 +142,12 @@ void PrivLR_test(int& _party) {
     const size_t size = train_mat[0].size();
 
     Logistic* logistic = new Logistic(party, io_pack);
-    START_TIMER
     logistic->gradAscent(train_mat, train_label, num_iter, 0.008);
-    STOP_TIMER("train")
+    #ifdef USE_TIME_COUNT
+    std::cout << "linear time: " << linear_time << " ms\n";
+    std::cout << "non_linear time: " << non_linear_time << " ms\n";
+    std::cout << "time used: " << logistic_time << " ms\n";
+    #endif
 
     size_t comm   = io_pack->get_comm();
     size_t rounds = io_pack->get_rounds();

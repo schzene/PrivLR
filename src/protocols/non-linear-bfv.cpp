@@ -1,5 +1,4 @@
 #include "non-linear-bfv.h"
-#include "utils/bfv-tools.h"
 
 namespace PrivLR_BFV {
 double NonLinear::mul2add(const double in) const {
@@ -16,6 +15,7 @@ double NonLinear::mul2add(const double in) const {
         double r1_in = r1 * in, r2_in = r2 * in;
         double r1b_inb;
         BFVLongCiphertext r1b_secret_b;
+
         BFVLongCiphertext::recv(io_pack->io_rev, &r1b_secret_b, party->parm->context);
         io_pack->recv_data(&r1b_inb, sizeof(double));
 
@@ -61,6 +61,9 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
     size_t size = in.size();
     vector<double> r1(size), r2(size), res(size);
     if (*party == ALICE) {
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
         vector<double> r1_in(size), r2_in(size);
         vector<uint64_t> div_r2_prime(size), r1_div_r2_prime(size);
         for (size_t i = 0; i < size; i++) {
@@ -73,8 +76,15 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         }
         vector<double> r1b_inb(size);
         BFVLongCiphertext r1b_secret_b;
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
         BFVLongCiphertext::recv(io_pack->io_rev, &r1b_secret_b, party->parm->context);
         io_pack->recv_data(r1b_inb.data(), sizeof(double) * size);
+
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
 
         BFVLongPlaintext div_r2_plain(party->parm, div_r2_prime), r1_div_r2_plain(party->parm, r1_div_r2_prime);
         r1b_secret_b.multiply_plain_inplace(r1_div_r2_plain, party->parm->evaluator);
@@ -85,8 +95,14 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         for (size_t i = 0; i < size; i++) {
             res[i] = r1b_inb[i] * r1_in[i];
         }
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
     }
     else {
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
         vector<double> r1_in(size), r2a_ina(size);
         vector<uint64_t> r1_prime(size);
         for (size_t i = 0; i < size; i++) {
@@ -99,15 +115,25 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
         BFVLongCiphertext::send(io_pack->io, &r1_secret_b);
         io_pack->send_data(r1_in.data(), sizeof(double) * size);
 
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
+
         BFVLongCiphertext r2_secret_b;
         BFVLongCiphertext::recv(io_pack->io_rev, &r2_secret_b, party->parm->context);
         io_pack->recv_data(r2a_ina.data(), sizeof(double) * size);
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
         BFVLongPlaintext r2_plain = r2_secret_b.decrypt(party);
         vector<uint64_t> r2_prime = r2_plain.decode_uint(party->parm);
         for (size_t i = 0; i < size; i++) {
             r2[i]  = static_cast<double>(r2_prime[i]) / (1ULL << (2 * SCALE));
             res[i] = r2[i] * in[i] * r2a_ina[i];
         }
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
     }
 
     return res;
@@ -136,14 +162,28 @@ vector<double> NonLinear::sigmoid(const vector<double>& in) const {
         exp_neg_in[i] = exp(-in[i]) * r[i];
     }
     vector<double> r_add = mul2add(r), exp_neg_in_add = mul2add(exp_neg_in);
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
     for (size_t i = 0; i < size; i++) {
         theta[i] = r_add[i] + exp_neg_in_add[i];
     }
     io_pack->send_data(theta.data(), sizeof(double) * size);
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
+
     io_pack->recv_data(theta_remote.data(), sizeof(double) * size);
+
+#ifdef USE_TIME_COUNT
+nl_start_time = TIME_STAMP;
+#endif
     for (size_t i = 0; i < size; i++) {
         r_add[i] = r_add[i] / (theta[i] + theta_remote[i]);
     }
+#ifdef USE_TIME_COUNT
+non_linear_time = TIME_STAMP - nl_start_time;
+#endif
     return r_add;
 }
 }  // namespace PrivLR_BFV

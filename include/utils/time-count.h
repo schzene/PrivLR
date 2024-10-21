@@ -2,6 +2,11 @@
 #define FAST_TIME_COUNT_H__
 #include <iostream>
 
+typedef unsigned long long timestamp;
+
+#define TIME_STAMP \
+    std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
+
 #define INIT_TIMER                                                    \
     auto start_timer     = std::chrono::high_resolution_clock::now(); \
     uint64_t pause_timer = 0;                                         \

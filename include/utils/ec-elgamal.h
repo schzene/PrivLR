@@ -36,9 +36,7 @@
 #define PRIV_LR_ECELGAMAL_H
 
 #include <openssl/ec.h>
-#include <openssl/bn.h>
 #include <openssl/objects.h>
-#include <inttypes.h>
 #include "uthash.h"
 
 #define DEFAULT_CURVE NID_X9_62_prime192v1

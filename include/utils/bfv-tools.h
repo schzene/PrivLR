@@ -33,12 +33,11 @@ class BFVParm {
 public:
     size_t poly_modulus_degree;
     size_t slot_count;
-    vector<int> coeff_bit_sizes;
     uint64_t plain_mod;
     SEALContext* context;
     BatchEncoder* encoder;
     Evaluator* evaluator;
-    BFVParm(size_t poly_modulus_degree, vector<int> coeff_bit_sizes, uint64_t plain_mod);
+    BFVParm(size_t poly_modulus_degree, uint64_t plain_mod);
     ~BFVParm();
 };
 

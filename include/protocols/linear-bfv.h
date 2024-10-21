@@ -3,6 +3,12 @@
 
 #include "protocol-bfv.h"
 
+#ifdef USE_TIME_COUNT
+timestamp linear_time = 0;
+timestamp l_start_time = 0;
+timestamp l_end_time = 0;
+#endif
+
 namespace PrivLR_BFV {
 class Linear : public Protocol {
 public:

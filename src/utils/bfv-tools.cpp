@@ -51,16 +51,16 @@ void print_parameters(std::shared_ptr<seal::SEALContext> context) {
     std::cout << "\\" << std::endl;
 }
 
-BFVParm::BFVParm(size_t poly_modulus_degree_, vector<int> coeff_bit_sizes_, uint64_t plain_mod_)
+BFVParm::BFVParm(size_t poly_modulus_degree_, uint64_t plain_mod_)
     : poly_modulus_degree(poly_modulus_degree_),
       slot_count(poly_modulus_degree_),
-      coeff_bit_sizes(coeff_bit_sizes_),
       plain_mod(plain_mod_) {
     // Generate keys
     EncryptionParameters parms(scheme_type::bfv);
 
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, coeff_bit_sizes_));
+    // parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, coeff_bit_sizes_));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(plain_mod);
 
     context   = new SEALContext(parms, true, seal::sec_level_type::tc128);

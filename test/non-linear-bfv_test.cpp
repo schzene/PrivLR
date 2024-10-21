@@ -1,4 +1,5 @@
 #include <protocols/non-linear-bfv.h>
+
 using namespace PrivLR_BFV;
 
 int main(int argc, const char** argv) {

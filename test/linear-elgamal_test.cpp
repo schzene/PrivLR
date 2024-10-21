@@ -1,7 +1,5 @@
 #include <protocols/linear-elgamal.h>
-#include "utils/ec-elgamal.h"
-#include "utils/ec-elgamal.hpp"
-#include "utils/time-count.h"
+
 
 using namespace PrivLR_Elgamal;
 

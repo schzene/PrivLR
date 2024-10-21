@@ -1,8 +1,8 @@
 #ifndef PRIV_LR_PROTOCOL_BFV_H__
 #define PRIV_LR_PROTOCOL_BFV_H__
 
-#define BIT_LENGTH 37
-#define SCALE      12
+#define SCALE 12
+#define USE_TIME_COUNT
 
 #include <cassert>
 #include <random>

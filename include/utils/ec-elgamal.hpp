@@ -1,7 +1,6 @@
 #ifndef PRIV_LR_EC_ELGAMAL_HPP__
 #define PRIV_LR_EC_ELGAMAL_HPP__
 #include <cstddef>
-#include <openssl/ec.h>
 #include <vector>
 
 #include "io.h"

@@ -1,8 +1,6 @@
 #ifndef PRIV_LR_LOGIST_REGRESSION_H_
 #define PRIV_LR_LOGIST_REGRESSION_H_
 
-#include <algorithm>
-
 #include "protocols/linear-paillier.h"
 #include "protocols/non-linear-paillier.h"
 

@@ -3,6 +3,12 @@
 
 #include "protocol-bfv.h"
 
+#ifdef USE_TIME_COUNT
+timestamp non_linear_time = 0;
+timestamp nl_start_time = 0;
+timestamp nl_end_time = 0;
+#endif
+
 namespace PrivLR_BFV {
 class NonLinear : public Protocol {
 public:

@@ -33,8 +33,6 @@
  */
 
 #include "ec-elgamal.h"
-#include <openssl/bn.h>
-#include <openssl/ec.h>
 
 char* point_to_string(EC_GROUP* curve_group, const EC_POINT* point) {
     BN_CTX* ctx = BN_CTX_new();

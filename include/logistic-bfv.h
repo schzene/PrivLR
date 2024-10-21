@@ -1,11 +1,14 @@
 #ifndef PRIV_LR_LOGIST_REGRESSION_H_
 #define PRIV_LR_LOGIST_REGRESSION_H_
 
-#include <algorithm>
-
 #include "protocols/linear-bfv.h"
 #include "protocols/non-linear-bfv.h"
-#include "utils/bfv-tools.h"
+
+#ifdef USE_TIME_COUNT
+timestamp logistic_time = 0;
+timestamp start_time = 0;
+timestamp end_time = 0;
+#endif
 
 namespace PrivLR_BFV {
 class Logistic {

@@ -1,4 +1,5 @@
 #include <protocols/linear-bfv.h>
+
 using namespace PrivLR_BFV;
 
 int main(int argc, const char** argv) {
@@ -17,7 +18,7 @@ int main(int argc, const char** argv) {
                   << "\n";
     }
     IOPack* io_pack = new IOPack(party_);
-    BFVParm* parm   = new BFVParm(8192, {60, 40, 40, 60}, default_prime_mod.at(29));
+    BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(31));
     BFVKey* party   = new BFVKey(party_, parm);
 
     size_t size      = 10;
@@ -66,7 +67,7 @@ int main(int argc, const char** argv) {
             cout << res[j] + res_a[j] << "\n";
         }
     }
-
+    std::cout << linear_time << "\n";
     delete io_pack;
     delete linear;
 }
