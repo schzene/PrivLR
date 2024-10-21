@@ -18,7 +18,7 @@ sudo make install
 * [NTL 11.5.1](https://libntl.org/download.html)
 
 ```
-./configure 
+./configure CXXFLAGS='-g -O2 -fPIC'
 make 
 make check
 make install
