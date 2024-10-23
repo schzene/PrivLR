@@ -1,7 +1,7 @@
 #include <logistic-paillier.h>
 
 using namespace PrivLR_Paillier;
-int num_iter = 25;
+int party = 1, num_iter = 25, dataset = 1;
 
 INIT_TIMER
 
@@ -87,21 +87,32 @@ double testResult(vector<vector<double>>& testDataMat, vector<int>& testDataLabe
 }
 
 void testPlaintext() {
+    INIT_TIMER
     std::cout << "**************************************************\n"
               << "testPlaintext(Base)\n"
               << "**************************************************\n";
     vector<vector<double>> base_train_mat;
     vector<int> base_train_label;
-    // string base_train_file("/data/PrivLR/ACAD");
-    // string base_train_file("/data/PrivLR/HFCR");
-    string base_train_file("/data/PrivLR/WIBC");
+    string base_train_file;
+    if (dataset == 1) {
+        base_train_file = "/data/PrivLR/ACAD_train";
+    } else if (dataset == 2) {
+        base_train_file = "/data/PrivLR/HFCR_train";
+    } else {
+        base_train_file = "/data/PrivLR/WIBC_train";
+    }
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
 
     vector<vector<double>> base_test_mat;
     vector<int> base_test_label;
-    // string base_test_file("/data/PrivLR/ACAD_test");
-    // string base_test_file("/data/PrivLR/HFCR_test");
-    string base_test_file("/data/PrivLR/WIBC_test");
+    string base_test_file;
+    if (dataset == 1) {
+        base_test_file = "/data/PrivLR/ACAD_test";
+    } else if (dataset == 2) {
+        base_test_file = "/data/PrivLR/HFCR_test";
+    } else {
+        base_test_file = "/data/PrivLR/WIBC_test";
+    }
     load_dataset_base(base_test_mat, base_test_label, base_test_file);
 
     vector<double> base_weight(base_train_mat[0].size(), 1);
@@ -114,25 +125,41 @@ void testPlaintext() {
     std::cout << "**************************************************\n\n";
 }
 
-void PrivLR_test(int& party) {
+void PrivLR_test(int& _party) {
     std::cout << "**************************************************\n"
               << "PrivLR_test:\n"
               << "**************************************************\n";
     string train_file, test_file;
-    if (party == ALICE) {
+    if (_party == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
-        train_file = "/data/PrivLR/WIBC_alice";
-        test_file  = "/data/PrivLR/WIBC_alice_test";
+        if (dataset == 1) {
+            train_file = "/data/PrivLR/ACAD_alice";
+            test_file = "/data/PrivLR/ACAD_alice_test";
+        } else if (dataset == 2) {
+            train_file = "/data/PrivLR/HFCR_alice";
+            test_file = "/data/PrivLR/HFCR_alice_test";
+        } else {
+            train_file = "/data/PrivLR/WIBC_alice";
+            test_file = "/data/PrivLR/WIBC_alice_test";
+        }
     }
     else {
-        party = BOB;
+        _party = BOB;
         std::cout << "Party: BOB"
                   << "\n";
-        train_file = "/data/PrivLR/WIBC_bob";
-        test_file  = "/data/PrivLR/WIBC_bob_test";
+        if (dataset == 1) {
+            train_file = "/data/PrivLR/ACAD_bob";
+            test_file = "/data/PrivLR/ACAD_bob_test";
+        } else if (dataset == 2) {
+            train_file = "/data/PrivLR/HFCR_bob";
+            test_file = "/data/PrivLR/HFCR_bob_test";
+        } else {
+            train_file = "/data/PrivLR/WIBC_bob";
+            test_file = "/data/PrivLR/WIBC_bob_test";
+        }
     }
-    IOPack* io_pack = new IOPack(party);
+    IOPack* io_pack = new IOPack(_party);
 
     vector<vector<double>> train_mat, test_mat;
     vector<int> train_label, test_label;
@@ -140,7 +167,7 @@ void PrivLR_test(int& party) {
     load_dataset(test_mat, test_label, test_file);
     const size_t size = train_mat[0].size();
 
-    Logistic* logistic = new Logistic(party, io_pack);
+    Logistic* logistic = new Logistic(_party, io_pack);
     START_TIMER
     logistic->gradAscent(train_mat, train_label, num_iter, 0.008);
     STOP_TIMER("train")
@@ -163,7 +190,7 @@ void PrivLR_test(int& party) {
 
     size_t test_size      = test_mat.size();
     vector<double> result = logistic->classify(test_mat);
-    if (party == BOB) {
+    if (_party == BOB) {
         io_pack->send_data(result.data(), sizeof(double) * test_size);
         io_pack->send_data(test_label.data(), sizeof(int) * test_size);
     }
@@ -189,7 +216,10 @@ void PrivLR_test(int& party) {
 }
 
 int main(int argc, const char** argv) {
-    int party = argv[1][0] - '0';
+    assert(argc == 4);
+    party = atoi(argv[1]);
+    dataset = atoi(argv[2]);
+    num_iter = atoi(argv[3]);
     PrivLR_test(party);
     if (party == BOB) {
         testPlaintext();

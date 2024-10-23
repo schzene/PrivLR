@@ -1,7 +1,7 @@
 #include <logistic-bfv.h>
 
 using namespace PrivLR_BFV;
-int num_iter = 25;
+int party = 1, num_iter = 25, dataset = 1;
 
 void load_dataset_base(vector<vector<double>>& datas, vector<int>& label, const string& filename) {
     std::ifstream file(filename);
@@ -91,16 +91,26 @@ void testPlaintext() {
               << "**************************************************\n";
     vector<vector<double>> base_train_mat;
     vector<int> base_train_label;
-    // string base_train_file("/data/PrivLR/ACAD");
-    // string base_train_file("/data/PrivLR/HFCR");
-    string base_train_file("/data/PrivLR/WIBC");
+    string base_train_file;
+    if (dataset == 1) {
+        base_train_file = "/data/PrivLR/ACAD_train";
+    } else if (dataset == 2) {
+        base_train_file = "/data/PrivLR/HFCR_train";
+    } else {
+        base_train_file = "/data/PrivLR/WIBC_train";
+    }
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
 
     vector<vector<double>> base_test_mat;
     vector<int> base_test_label;
-    // string base_test_file("/data/PrivLR/ACAD_test");
-    // string base_test_file("/data/PrivLR/HFCR_test");
-    string base_test_file("/data/PrivLR/WIBC_test");
+    string base_test_file;
+    if (dataset == 1) {
+        base_test_file = "/data/PrivLR/ACAD_test";
+    } else if (dataset == 2) {
+        base_test_file = "/data/PrivLR/HFCR_test";
+    } else {
+        base_test_file = "/data/PrivLR/WIBC_test";
+    }
     load_dataset_base(base_test_mat, base_test_label, base_test_file);
 
     vector<double> base_weight(base_train_mat[0].size(), 1);
@@ -121,15 +131,31 @@ void PrivLR_test(int& _party) {
     if (_party == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
-        train_file = "/data/PrivLR/WIBC_alice";
-        test_file  = "/data/PrivLR/WIBC_alice_test";
+        if (dataset == 1) {
+            train_file = "/data/PrivLR/ACAD_alice";
+            test_file = "/data/PrivLR/ACAD_alice_test";
+        } else if (dataset == 2) {
+            train_file = "/data/PrivLR/HFCR_alice";
+            test_file = "/data/PrivLR/HFCR_alice_test";
+        } else {
+            train_file = "/data/PrivLR/WIBC_alice";
+            test_file = "/data/PrivLR/WIBC_alice_test";
+        }
     }
     else {
         _party = BOB;
         std::cout << "Party: BOB"
                   << "\n";
-        train_file = "/data/PrivLR/WIBC_bob";
-        test_file  = "/data/PrivLR/WIBC_bob_test";
+        if (dataset == 1) {
+            train_file = "/data/PrivLR/ACAD_bob";
+            test_file = "/data/PrivLR/ACAD_bob_test";
+        } else if (dataset == 2) {
+            train_file = "/data/PrivLR/HFCR_bob";
+            test_file = "/data/PrivLR/HFCR_bob_test";
+        } else {
+            train_file = "/data/PrivLR/WIBC_bob";
+            test_file = "/data/PrivLR/WIBC_bob_test";
+        }
     }
     BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(29));
     BFVKey* party   = new BFVKey(_party, parm);
@@ -193,7 +219,10 @@ void PrivLR_test(int& _party) {
 }
 
 int main(int argc, const char** argv) {
-    int party = argv[1][0] - '0';
+    assert(argc == 4);
+    party = atoi(argv[1]);
+    dataset = atoi(argv[2]);
+    num_iter = atoi(argv[3]);
     PrivLR_test(party);
     if (party == BOB) {
         testPlaintext();
