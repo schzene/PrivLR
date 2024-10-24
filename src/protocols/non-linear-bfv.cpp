@@ -77,7 +77,7 @@ nl_start_time = TIME_STAMP;
         vector<double> r1b_inb(size);
         BFVLongCiphertext r1b_secret_b;
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
         BFVLongCiphertext::recv(io_pack->io_rev, &r1b_secret_b, party->parm->context);
         io_pack->recv_data(r1b_inb.data(), sizeof(double) * size);
@@ -96,7 +96,7 @@ nl_start_time = TIME_STAMP;
             res[i] = r1b_inb[i] * r1_in[i];
         }
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
     }
     else {
@@ -116,7 +116,7 @@ nl_start_time = TIME_STAMP;
         io_pack->send_data(r1_in.data(), sizeof(double) * size);
 
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
 
         BFVLongCiphertext r2_secret_b;
@@ -132,7 +132,7 @@ nl_start_time = TIME_STAMP;
             res[i] = r2[i] * in[i] * r2a_ina[i];
         }
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
     }
 
@@ -170,7 +170,7 @@ nl_start_time = TIME_STAMP;
     }
     io_pack->send_data(theta.data(), sizeof(double) * size);
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
 
     io_pack->recv_data(theta_remote.data(), sizeof(double) * size);
@@ -182,7 +182,7 @@ nl_start_time = TIME_STAMP;
         r_add[i] = r_add[i] / (theta[i] + theta_remote[i]);
     }
 #ifdef USE_TIME_COUNT
-non_linear_time = TIME_STAMP - nl_start_time;
+non_linear_time += TIME_STAMP - nl_start_time;
 #endif
     return r_add;
 }

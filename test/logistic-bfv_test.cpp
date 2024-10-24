@@ -2,6 +2,7 @@
 
 using namespace PrivLR_BFV;
 int party = 1, num_iter = 25, dataset = 1;
+string ip = "127.0.0.1";
 
 void load_dataset_base(vector<vector<double>>& datas, vector<int>& label, const string& filename) {
     std::ifstream file(filename);
@@ -93,11 +94,11 @@ void testPlaintext() {
     vector<int> base_train_label;
     string base_train_file;
     if (dataset == 1) {
-        base_train_file = "/data/PrivLR/ACAD_train";
+        base_train_file = "/data/PrivLR/ACAD";
     } else if (dataset == 2) {
-        base_train_file = "/data/PrivLR/HFCR_train";
+        base_train_file = "/data/PrivLR/HFCR";
     } else {
-        base_train_file = "/data/PrivLR/WIBC_train";
+        base_train_file = "/data/PrivLR/WIBC";
     }
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
 
@@ -159,7 +160,7 @@ void PrivLR_test(int& _party) {
     }
     BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(29));
     BFVKey* party   = new BFVKey(_party, parm);
-    IOPack* io_pack = new IOPack(_party);
+    IOPack* io_pack = new IOPack(_party, ip);
 
     vector<vector<double>> train_mat, test_mat;
     vector<int> train_label, test_label;
@@ -219,10 +220,13 @@ void PrivLR_test(int& _party) {
 }
 
 int main(int argc, const char** argv) {
-    assert(argc == 4);
+    assert(argc >= 4);
     party = atoi(argv[1]);
     dataset = atoi(argv[2]);
     num_iter = atoi(argv[3]);
+    if (argc >= 5) {
+        ip = argv[4];
+    }
     PrivLR_test(party);
     if (party == BOB) {
         testPlaintext();

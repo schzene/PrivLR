@@ -11,3 +11,6 @@ add_test(linear-paillier)
 
 add_test(logistic-bfv)
 add_test(logistic-paillier)
+
+add_test(non-linear-bfv)
+add_test(non-linear-paillier)
