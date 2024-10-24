@@ -67,7 +67,9 @@ int main(int argc, const char** argv) {
             cout << res[j] + res_a[j] << "\n";
         }
     }
+#ifdef USE_TIME_COUNT
     std::cout << linear_time << "\n";
+#endif
     delete io_pack;
     delete linear;
 }

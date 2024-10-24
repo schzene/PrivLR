@@ -1,4 +1,4 @@
-#include "data.h"
+#include "utils/data.h"
 
 void load_dataset(vector<vector<double>>& datas, vector<int>& label, const string& filename) {
     std::ifstream file(filename);

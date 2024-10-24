@@ -1,7 +1,7 @@
-#include "linear-bfv.h"
+#include "protocols/linear-bfv.h"
 
 namespace PrivLR_BFV {
-double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_b) const {
+double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_b) {
     assert(in_a.size() == in_b.size());
     size_t size = in_a.size();
     std::random_device rd;
@@ -16,7 +16,7 @@ double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_
         in_b_prime[i] = static_cast<uint64_t>(in_b[i] * (1ULL << SCALE)) % party->parm->plain_mod;
     }
     BFVLongPlaintext in_a_plain(party->parm, in_a_prime), in_b_plain(party->parm, in_b_prime);
-    if (*party == ALICE) {
+    if (party->party == ALICE) {
         BFVLongCiphertext lct_a(in_a_plain, party), lct_b(in_b_plain, party);
         BFVLongCiphertext::send(io_pack->io, &lct_a);
         BFVLongCiphertext::send(io_pack->io, &lct_b);
@@ -67,17 +67,14 @@ double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_
     return res;
 }
 
-vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vector<double>& in_b,
-                                   double transpose) const {
+vector<double> Linear::dot_product(const vector<vector<double>>& in_a, const vector<double>& in_b, double transpose) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
     size_t data_size = transpose ? in_a[0].size() : in_a.size(), size = in_b.size();
     vector<double> in_a_flatten(data_size * size);
 
-#ifdef USE_TIME_COUNT
-l_start_time = TIME_STAMP;
-#endif
+    start_time = TIME_STAMP;
 
     if (transpose) {
         for (size_t i = 0; i < data_size; i++) {
@@ -94,7 +91,7 @@ l_start_time = TIME_STAMP;
         }
     }
     vector<double> res(data_size), in_b_flatten(data_size * size);
-    vector<uint64_t>  in_a_flatten_prime(data_size * size), in_b_flatten_prime(data_size * size);
+    vector<uint64_t> in_a_flatten_prime(data_size * size), in_b_flatten_prime(data_size * size);
     for (size_t i = 0; i < data_size; i++) {
         for (size_t j = 0; j < size; j++) {
             res[i] += in_a_flatten[i * size + j] * in_b[j];
@@ -109,28 +106,20 @@ l_start_time = TIME_STAMP;
     BFVLongPlaintext in_a_flatten_plain(party->parm, in_a_flatten_prime),
         in_b_flatten_plain(party->parm, in_b_flatten_prime);
 
-#ifdef USE_TIME_COUNT
-linear_time += TIME_STAMP - l_start_time;
-#endif
+    time_cost += TIME_STAMP - start_time;
 
-    if (*party == ALICE) {
-#ifdef USE_TIME_COUNT
-l_start_time = TIME_STAMP;
-#endif
+    if (party->party == ALICE) {
+        start_time = TIME_STAMP;
         BFVLongCiphertext lct_a(in_a_flatten_plain, party), lct_b(in_b_flatten_plain, party);
         BFVLongCiphertext::send(io_pack->io, &lct_a);
         BFVLongCiphertext::send(io_pack->io, &lct_b);
 
-#ifdef USE_TIME_COUNT
-linear_time += TIME_STAMP - l_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
 
         BFVLongCiphertext res_part1_secret_a, res_part2_secret_a;
         BFVLongCiphertext::recv(io_pack->io_rev, &res_part1_secret_a, party->parm->context);
         BFVLongCiphertext::recv(io_pack->io_rev, &res_part2_secret_a, party->parm->context);
-#ifdef USE_TIME_COUNT
-l_start_time = TIME_STAMP;
-#endif
+        start_time                       = TIME_STAMP;
         BFVLongPlaintext res_part1_plain = res_part1_secret_a.decrypt(party),
                          res_part2_plain = res_part2_secret_a.decrypt(party);
         vector<uint64_t> res_part1_prime = res_part1_plain.decode_uint(party->parm),
@@ -147,18 +136,14 @@ l_start_time = TIME_STAMP;
                 res[i] += (res_part1[i * size + j] + res_part2[i * size + j]) * 1. / (1ULL << (2 * SCALE));
             }
         }
-#ifdef USE_TIME_COUNT
-linear_time += TIME_STAMP - l_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
     }
     else {
         BFVLongCiphertext lct_a, lct_b;
         BFVLongCiphertext::recv(io_pack->io_rev, &lct_a, party->parm->context);
         BFVLongCiphertext::recv(io_pack->io_rev, &lct_b, party->parm->context);
 
-#ifdef USE_TIME_COUNT
-l_start_time = TIME_STAMP;
-#endif
+        start_time = TIME_STAMP;
 
         lct_a.multiply_plain_inplace(in_b_flatten_plain, party->parm->evaluator);
         lct_b.multiply_plain_inplace(in_a_flatten_plain, party->parm->evaluator);
@@ -181,9 +166,7 @@ l_start_time = TIME_STAMP;
         }
         BFVLongCiphertext::send(io_pack->io, &lct_a);
         BFVLongCiphertext::send(io_pack->io, &lct_b);
-#ifdef USE_TIME_COUNT
-linear_time += TIME_STAMP - l_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
     }
     return res;
 }

@@ -1,4 +1,4 @@
-#include "bfv-tools.h"
+#include "utils/bfv-tools.h"
 
 #define MAX_SZ 10
 
@@ -52,9 +52,7 @@ void print_parameters(std::shared_ptr<seal::SEALContext> context) {
 }
 
 BFVParm::BFVParm(size_t poly_modulus_degree_, uint64_t plain_mod_)
-    : poly_modulus_degree(poly_modulus_degree_),
-      slot_count(poly_modulus_degree_),
-      plain_mod(plain_mod_) {
+    : poly_modulus_degree(poly_modulus_degree_), slot_count(poly_modulus_degree_), plain_mod(plain_mod_) {
     // Generate keys
     EncryptionParameters parms(scheme_type::bfv);
 
@@ -291,21 +289,22 @@ BFVLongCiphertext::BFVLongCiphertext(const Ciphertext& ct) {
      BFVLongCiphertext: for field [0,2p]
 */
 
-BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, uint64_t data, BFVKey* party) {
+BFVLongCiphertext::BFVLongCiphertext(uint64_t data, const BFVKey* party) {
     // TODO:
     len = 1;
     Plaintext pt;
-    vector<uint64_t> temp(parm->slot_count, data);
-    parm->encoder->encode(temp, pt);
+    vector<uint64_t> temp(party->parm->slot_count, data);
+    party->parm->encoder->encode(temp, pt);
     Ciphertext ct;
     party->encryptor->encrypt(pt, ct);
     cipher_data.push_back(ct);
 }
 
-BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, uint64_t* data, size_t len, BFVKey* party) {
-    this->len         = len;
-    size_t slot_count = parm->slot_count;  // TODO:: this slot_count use SEALcontext? BFVLongPlaintext contain it.
-    size_t count      = len / slot_count;
+BFVLongCiphertext::BFVLongCiphertext(uint64_t* data, size_t len, const BFVKey* party) {
+    this->len = len;
+    size_t slot_count =
+        party->parm->slot_count;  // TODO:: this slot_count use SEALcontext? BFVLongPlaintext contain it.
+    size_t count = len / slot_count;
 
     if (len % slot_count) {
         count++;
@@ -314,7 +313,7 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, uint64_t* data, size_t len, 
     if (slot_count >= len) {
         Plaintext pt;
         Ciphertext ct;
-        parm->encoder->encode(vector<uint64_t>(data, data + len), pt);
+        party->parm->encoder->encode(vector<uint64_t>(data, data + len), pt);
         party->encryptor->encrypt(pt, ct);
         cipher_data.push_back(ct);
     }
@@ -326,7 +325,7 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, uint64_t* data, size_t len, 
             vector<uint64_t> temp(curPtr, end);
             Plaintext pt;
             Ciphertext ct;
-            parm->encoder->encode(temp, pt);
+            party->parm->encoder->encode(temp, pt);
             party->encryptor->encrypt(pt, ct);
             cipher_data.push_back(ct);
             curPtr += slot_count;
@@ -338,21 +337,22 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, uint64_t* data, size_t len, 
      BFVLongCiphertext: for field [-p,p]
 */
 
-BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, int64_t data, BFVKey* party) {
+BFVLongCiphertext::BFVLongCiphertext(int64_t data, const BFVKey* party) {
     // TODO:
     len = 1;
     Plaintext pt;
-    vector<int64_t> temp(parm->slot_count, data);
-    parm->encoder->encode(temp, pt);
+    vector<int64_t> temp(party->parm->slot_count, data);
+    party->parm->encoder->encode(temp, pt);
     Ciphertext ct;
     party->encryptor->encrypt(pt, ct);
     cipher_data.push_back(ct);
 }
 
-BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, int64_t* data, size_t len, BFVKey* party) {
-    this->len         = len;
-    size_t slot_count = parm->slot_count;  // TODO:: this slot_count use SEALcontext? BFVLongPlaintext contain it.
-    size_t count      = len / slot_count;
+BFVLongCiphertext::BFVLongCiphertext(int64_t* data, size_t len, const BFVKey* party) {
+    this->len = len;
+    size_t slot_count =
+        party->parm->slot_count;  // TODO:: this slot_count use SEALcontext? BFVLongPlaintext contain it.
+    size_t count = len / slot_count;
 
     if (len % slot_count) {
         count++;
@@ -361,7 +361,7 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, int64_t* data, size_t len, B
     if (slot_count >= len) {
         Plaintext pt;
         Ciphertext ct;
-        parm->encoder->encode(vector<int64_t>(data, data + len), pt);
+        party->parm->encoder->encode(vector<int64_t>(data, data + len), pt);
         party->encryptor->encrypt(pt, ct);
         cipher_data.push_back(ct);
     }
@@ -373,7 +373,7 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, int64_t* data, size_t len, B
             vector<int64_t> temp(curPtr, end);
             Plaintext pt;
             Ciphertext ct;
-            parm->encoder->encode(temp, pt);
+            party->parm->encoder->encode(temp, pt);
             party->encryptor->encrypt(pt, ct);
             cipher_data.push_back(ct);
             curPtr += slot_count;
@@ -385,7 +385,7 @@ BFVLongCiphertext::BFVLongCiphertext(BFVParm* parm, int64_t* data, size_t len, B
      BFVLongCiphertext:END
 */
 
-BFVLongCiphertext::BFVLongCiphertext(const BFVLongPlaintext& lpt, BFVKey* party) {
+BFVLongCiphertext::BFVLongCiphertext(const BFVLongPlaintext& lpt, const BFVKey* party) {
     len         = lpt.len;
     size_t size = lpt.plain_data.size();
     cipher_data.resize(size);
@@ -395,7 +395,7 @@ BFVLongCiphertext::BFVLongCiphertext(const BFVLongPlaintext& lpt, BFVKey* party)
     }
 }
 
-BFVLongPlaintext BFVLongCiphertext::decrypt(BFVKey* party) const {
+BFVLongPlaintext BFVLongCiphertext::decrypt(const BFVKey* party) const {
     BFVLongPlaintext lpt;
     lpt.len     = len;
     size_t size = cipher_data.size();

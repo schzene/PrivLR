@@ -2,7 +2,6 @@
 #define PRIV_LR_PROTOCOL_BFV_H__
 
 #define SCALE 12
-#define USE_TIME_COUNT
 
 #include <cassert>
 #include <random>
@@ -15,15 +14,16 @@ using std::vector;
 namespace PrivLR_BFV {
 class Protocol {
 protected:
-    BFVKey* party;
+    const BFVKey* party;
 
 public:
-    IOPack* io_pack;
+    const IOPack* io_pack;
+    timestamp time_cost  = 0;
+    timestamp start_time = 0;
 
-    Protocol(BFVKey* party, IOPack* io_pack) {
+    Protocol(const BFVKey* _party, const IOPack* _io_pack) : party(_party), io_pack(_io_pack) {
+        assert(party != nullptr);
         assert(io_pack != nullptr);
-        this->party   = party;
-        this->io_pack = io_pack;
     }
 };
 }  // namespace PrivLR_BFV

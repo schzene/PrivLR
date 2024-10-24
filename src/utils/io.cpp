@@ -22,7 +22,7 @@ SOFTWARE.
 Enquiries about further applications and development opportunities are welcome.
 */
 
-#include "io.h"
+#include "utils/io.h"
 
 NetIO::NetIO(const char* address, int port, bool full_buffer, bool quiet) {
     this->port = port;
@@ -163,13 +163,13 @@ IOPack::~IOPack() {
     delete io_rev;
 }
 
-void IOPack::send_data(const void* data, int len, bool count_comm) {
+void IOPack::send_data(const void* data, int len, bool count_comm) const {
     io->send_data(data, len);
     io->last_call = LastCall::Send;
     io->last_call = LastCall::Send;
 }
 
-void IOPack::recv_data(void* data, int len, bool count_comm) {
+void IOPack::recv_data(void* data, int len, bool count_comm) const {
     io_rev->recv_data(data, len);
     io->last_call = LastCall::Recv;
     io->last_call = LastCall::Recv;

@@ -1,8 +1,5 @@
-#include "utils/bfv-tools.h"
-#include "utils/time-count.h"
+#define USE_TIME_COUNT
 #include <protocols/non-linear-bfv.h>
-#include <cstdint>
-
 using namespace PrivLR_BFV;
 
 #ifdef USE_TIME_COUNT
@@ -69,7 +66,7 @@ vector<uint64_t> NonLinear_BFV::sigmoid(const vector<double>& in) const {
     std::uniform_real_distribution<> dist1(0, 1);
     size_t size = in.size();
     vector<uint64_t> res_prime(size);
-    if (*party == ALICE) {
+    if (party->party == ALICE) {
         vector<double> in_blind(size);
         double r = 1, r3 = r * r * r, r5 = r3 * r * r;
 #ifdef USE_TIME_COUNT
@@ -81,8 +78,7 @@ vector<uint64_t> NonLinear_BFV::sigmoid(const vector<double>& in) const {
         uint64_t r_prime  = uint64_t(1 / r * (1ULL << SCALE)) % party->parm->plain_mod;
         uint64_t r3_prime = uint64_t(1 / r3 * (1ULL << SCALE)) % party->parm->plain_mod;
         uint64_t r5_prime = uint64_t(1 / r5 * (1ULL << SCALE)) % party->parm->plain_mod;
-        BFVLongCiphertext r1_a(party->parm, r_prime, party), r3_a(party->parm, r3_prime, party),
-            r5_a(party->parm, r5_prime, party);
+        BFVLongCiphertext r1_a(r_prime, party), r3_a(r3_prime, party), r5_a(r5_prime, party);
 
         io_pack->send_data(in_blind.data(), sizeof(double) * size);
         BFVLongCiphertext::send(io_pack->io, &r1_a);
@@ -217,7 +213,7 @@ int main(int argc, const char** argv) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-3, 3);
 
-    size_t size = 15;
+    size_t size  = 15;
     size_t round = 25;
 
     party_ = argv[1][0] - '0';
@@ -251,8 +247,11 @@ int main(int argc, const char** argv) {
         test_mpc(non_linear_mpc, in);
         test_bfv(non_linear_bfv, in, party->parm->plain_mod);
     }
-    std::cout << "mpc time count: " << non_linear_time << "\n";
+
+#ifdef USE_TIME_COUNT
+    std::cout << "mpc time count: " << non_linear_mpc->time_cost << "\n";
     std::cout << "bfv time count: " << bfv_time << "\n";
+#endif
 
     delete io_pack;
     delete non_linear_mpc;

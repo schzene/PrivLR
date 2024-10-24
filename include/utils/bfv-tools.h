@@ -102,14 +102,14 @@ public:
     BFVLongCiphertext() {}
     BFVLongCiphertext(const Ciphertext& ct);
 
-    BFVLongCiphertext(BFVParm* parm, uint64_t data, BFVKey* party);  // TODO: len =1
-    BFVLongCiphertext(BFVParm* parm, uint64_t* data, size_t len, BFVKey* party);
+    BFVLongCiphertext(uint64_t data, const BFVKey* party);  // TODO: len =1
+    BFVLongCiphertext(uint64_t* data, size_t len, const BFVKey* party);
 
-    BFVLongCiphertext(BFVParm* parm, int64_t data, BFVKey* party);  // TODO: len =1
-    BFVLongCiphertext(BFVParm* parm, int64_t* data, size_t len, BFVKey* party);
+    BFVLongCiphertext(int64_t data, const BFVKey* party);  // TODO: len =1
+    BFVLongCiphertext(int64_t* data, size_t len, const BFVKey* party);
 
-    BFVLongCiphertext(const BFVLongPlaintext& lpt, BFVKey* party);
-    BFVLongPlaintext decrypt(BFVKey* party) const;
+    BFVLongCiphertext(const BFVLongPlaintext& lpt, const BFVKey* party);
+    BFVLongPlaintext decrypt(const BFVKey* party) const;
 
     void add_plain_inplace(BFVLongPlaintext& lpt, Evaluator* evaluator);
     BFVLongCiphertext add_plain(BFVLongPlaintext& lpt, Evaluator* evaluator) const;

@@ -3,20 +3,14 @@
 
 #include "protocol-bfv.h"
 
-#ifdef USE_TIME_COUNT
-timestamp non_linear_time = 0;
-timestamp nl_start_time = 0;
-timestamp nl_end_time = 0;
-#endif
-
 namespace PrivLR_BFV {
 class NonLinear : public Protocol {
 public:
-    NonLinear(BFVKey* party, IOPack* io_pack) : Protocol(party, io_pack) {}
-    double mul2add(const double in) const;
-    vector<double> mul2add(const vector<double>& in) const;
-    double sigmoid(const double in) const;
-    vector<double> sigmoid(const vector<double>& in) const;
+    NonLinear(const BFVKey* party, const IOPack* io_pack) : Protocol(party, io_pack) {}
+    double mul2add(const double in);
+    vector<double> mul2add(const vector<double>& in);
+    double sigmoid(const double in);
+    vector<double> sigmoid(const vector<double>& in);
 };
 }  // namespace PrivLR_BFV
 

@@ -27,9 +27,7 @@ void Logistic::gradAscent(vector<vector<double>>& datas, vector<int>& label, int
         vector<double> classified = linear->dot_product(datas, weight);
         vector<double> h          = non_linear->sigmoid(classified);
         vector<double> error(data_size);
-#ifdef USE_TIME_COUNT
-start_time = TIME_STAMP;
-#endif
+        start_time = TIME_STAMP;
         for (int i = 0; i < data_size; i++) {
             double dist = label[i] - h[i];
             if (abs(dist) < 1e-10) {
@@ -37,20 +35,14 @@ start_time = TIME_STAMP;
             }
             error[i] = dist;
         }
-#ifdef USE_TIME_COUNT
-logistic_time = TIME_STAMP - start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
         vector<double> delta_weight = linear->dot_product(datas, error, true);
-#ifdef USE_TIME_COUNT
-start_time = TIME_STAMP;
-#endif
+        start_time                  = TIME_STAMP;
         for (int i = 0; i < size; i++) {
             weight[i] += alpha * delta_weight[i];
         }
         max_cycles--;
-#ifdef USE_TIME_COUNT
-logistic_time = TIME_STAMP - start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
         // Not a protocol content, only for statistical purposes
         {
             printf("Cycle remain: %3d", max_cycles);
@@ -68,8 +60,6 @@ logistic_time = TIME_STAMP - start_time;
             printf(", loss: %.10lf\n", sum_error / data_size);
         }
     }
-#ifdef USE_TIME_COUNT
-logistic_time =logistic_time + linear_time + non_linear_time;
-#endif
+    time_cost += time_cost + linear->time_cost + non_linear->time_cost;
 }
 }  // namespace PrivLR_BFV

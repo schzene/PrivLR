@@ -4,19 +4,15 @@
 #include "protocols/linear-bfv.h"
 #include "protocols/non-linear-bfv.h"
 
-#ifdef USE_TIME_COUNT
-timestamp logistic_time = 0;
-timestamp start_time = 0;
-timestamp end_time = 0;
-#endif
-
 namespace PrivLR_BFV {
 class Logistic {
-    IOPack* io_pack       = nullptr;
-    Linear* linear        = nullptr;
-    NonLinear* non_linear = nullptr;
-
 public:
+    timestamp time_cost  = 0;
+    timestamp start_time = 0;
+    IOPack* io_pack;
+    Linear* linear;
+    NonLinear* non_linear;
+
     vector<double> weight;
     Logistic(BFVKey* party, IOPack* io_pack);
     ~Logistic();

@@ -1,4 +1,4 @@
-#include "linear-paillier.h"
+#include "protocols/linear-paillier.h"
 
 namespace PrivLR_Paillier {
 double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_b) const {

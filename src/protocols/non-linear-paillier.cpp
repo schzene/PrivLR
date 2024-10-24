@@ -1,4 +1,4 @@
-#include "non-linear-paillier.h"
+#include "protocols/non-linear-paillier.h"
 
 namespace PrivLR_Paillier {
 double NonLinear::mul2add(const double in) const {

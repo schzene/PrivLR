@@ -1,7 +1,7 @@
-#include "non-linear-bfv.h"
+#include "protocols/non-linear-bfv.h"
 
 namespace PrivLR_BFV {
-double NonLinear::mul2add(const double in) const {
+double NonLinear::mul2add(const double in) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -9,7 +9,7 @@ double NonLinear::mul2add(const double in) const {
     std::uniform_real_distribution<> positive_dist2(0.5, 1);
     std::uniform_real_distribution<> negative_dist(-0.5, 0);
     double r1, r2;
-    if (*party == ALICE) {
+    if (party->party == ALICE) {
         r1           = positive_dist1(gen);
         r2           = positive_dist2(gen);
         double r1_in = r1 * in, r2_in = r2 * in;
@@ -51,7 +51,7 @@ double NonLinear::mul2add(const double in) const {
     return 0;
 }
 
-vector<double> NonLinear::mul2add(const vector<double>& in) const {
+vector<double> NonLinear::mul2add(const vector<double>& in) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -60,10 +60,8 @@ vector<double> NonLinear::mul2add(const vector<double>& in) const {
     std::uniform_real_distribution<> negative_dist(-0.5, 0);
     size_t size = in.size();
     vector<double> r1(size), r2(size), res(size);
-    if (*party == ALICE) {
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+    if (party->party == ALICE) {
+        start_time = TIME_STAMP;
         vector<double> r1_in(size), r2_in(size);
         vector<uint64_t> div_r2_prime(size), r1_div_r2_prime(size);
         for (size_t i = 0; i < size; i++) {
@@ -76,15 +74,11 @@ nl_start_time = TIME_STAMP;
         }
         vector<double> r1b_inb(size);
         BFVLongCiphertext r1b_secret_b;
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
         BFVLongCiphertext::recv(io_pack->io_rev, &r1b_secret_b, party->parm->context);
         io_pack->recv_data(r1b_inb.data(), sizeof(double) * size);
 
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+        start_time = TIME_STAMP;
 
         BFVLongPlaintext div_r2_plain(party->parm, div_r2_prime), r1_div_r2_plain(party->parm, r1_div_r2_prime);
         r1b_secret_b.multiply_plain_inplace(r1_div_r2_plain, party->parm->evaluator);
@@ -95,14 +89,10 @@ nl_start_time = TIME_STAMP;
         for (size_t i = 0; i < size; i++) {
             res[i] = r1b_inb[i] * r1_in[i];
         }
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
     }
     else {
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+        start_time = TIME_STAMP;
         vector<double> r1_in(size), r2a_ina(size);
         vector<uint64_t> r1_prime(size);
         for (size_t i = 0; i < size; i++) {
@@ -115,31 +105,25 @@ nl_start_time = TIME_STAMP;
         BFVLongCiphertext::send(io_pack->io, &r1_secret_b);
         io_pack->send_data(r1_in.data(), sizeof(double) * size);
 
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
 
         BFVLongCiphertext r2_secret_b;
         BFVLongCiphertext::recv(io_pack->io_rev, &r2_secret_b, party->parm->context);
         io_pack->recv_data(r2a_ina.data(), sizeof(double) * size);
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+        start_time                = TIME_STAMP;
         BFVLongPlaintext r2_plain = r2_secret_b.decrypt(party);
         vector<uint64_t> r2_prime = r2_plain.decode_uint(party->parm);
         for (size_t i = 0; i < size; i++) {
             r2[i]  = static_cast<double>(r2_prime[i]) / (1ULL << (2 * SCALE));
             res[i] = r2[i] * in[i] * r2a_ina[i];
         }
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+        time_cost += TIME_STAMP - start_time;
     }
 
     return res;
 }
 
-double NonLinear::sigmoid(const double in) const {
+double NonLinear::sigmoid(const double in) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -151,7 +135,7 @@ double NonLinear::sigmoid(const double in) const {
     return r_add / (theta + theta_remote);
 }
 
-vector<double> NonLinear::sigmoid(const vector<double>& in) const {
+vector<double> NonLinear::sigmoid(const vector<double>& in) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1, 1);
@@ -162,28 +146,19 @@ vector<double> NonLinear::sigmoid(const vector<double>& in) const {
         exp_neg_in[i] = exp(-in[i]) * r[i];
     }
     vector<double> r_add = mul2add(r), exp_neg_in_add = mul2add(exp_neg_in);
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+    start_time = TIME_STAMP;
     for (size_t i = 0; i < size; i++) {
         theta[i] = r_add[i] + exp_neg_in_add[i];
     }
     io_pack->send_data(theta.data(), sizeof(double) * size);
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+    time_cost += TIME_STAMP - start_time;
 
     io_pack->recv_data(theta_remote.data(), sizeof(double) * size);
-
-#ifdef USE_TIME_COUNT
-nl_start_time = TIME_STAMP;
-#endif
+    start_time = TIME_STAMP;
     for (size_t i = 0; i < size; i++) {
         r_add[i] = r_add[i] / (theta[i] + theta_remote[i]);
     }
-#ifdef USE_TIME_COUNT
-non_linear_time += TIME_STAMP - nl_start_time;
-#endif
+    time_cost += TIME_STAMP - start_time;
     return r_add;
 }
 }  // namespace PrivLR_BFV

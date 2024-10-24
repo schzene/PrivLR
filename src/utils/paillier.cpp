@@ -1,4 +1,4 @@
-#include "paillier.h"
+#include "utils/paillier.h"
 
 namespace paillier {
 ZZ string2ZZ(const string& str) {

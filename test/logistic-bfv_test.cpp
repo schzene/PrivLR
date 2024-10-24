@@ -1,3 +1,4 @@
+#define USE_TIME_COUNT
 #include <logistic-bfv.h>
 
 using namespace PrivLR_BFV;
@@ -95,9 +96,11 @@ void testPlaintext() {
     string base_train_file;
     if (dataset == 1) {
         base_train_file = "/data/PrivLR/ACAD";
-    } else if (dataset == 2) {
+    }
+    else if (dataset == 2) {
         base_train_file = "/data/PrivLR/HFCR";
-    } else {
+    }
+    else {
         base_train_file = "/data/PrivLR/WIBC";
     }
     load_dataset_base(base_train_mat, base_train_label, base_train_file);
@@ -107,9 +110,11 @@ void testPlaintext() {
     string base_test_file;
     if (dataset == 1) {
         base_test_file = "/data/PrivLR/ACAD_test";
-    } else if (dataset == 2) {
+    }
+    else if (dataset == 2) {
         base_test_file = "/data/PrivLR/HFCR_test";
-    } else {
+    }
+    else {
         base_test_file = "/data/PrivLR/WIBC_test";
     }
     load_dataset_base(base_test_mat, base_test_label, base_test_file);
@@ -134,13 +139,15 @@ void PrivLR_test(int& _party) {
                   << "\n";
         if (dataset == 1) {
             train_file = "/data/PrivLR/ACAD_alice";
-            test_file = "/data/PrivLR/ACAD_alice_test";
-        } else if (dataset == 2) {
+            test_file  = "/data/PrivLR/ACAD_alice_test";
+        }
+        else if (dataset == 2) {
             train_file = "/data/PrivLR/HFCR_alice";
-            test_file = "/data/PrivLR/HFCR_alice_test";
-        } else {
+            test_file  = "/data/PrivLR/HFCR_alice_test";
+        }
+        else {
             train_file = "/data/PrivLR/WIBC_alice";
-            test_file = "/data/PrivLR/WIBC_alice_test";
+            test_file  = "/data/PrivLR/WIBC_alice_test";
         }
     }
     else {
@@ -149,13 +156,15 @@ void PrivLR_test(int& _party) {
                   << "\n";
         if (dataset == 1) {
             train_file = "/data/PrivLR/ACAD_bob";
-            test_file = "/data/PrivLR/ACAD_bob_test";
-        } else if (dataset == 2) {
+            test_file  = "/data/PrivLR/ACAD_bob_test";
+        }
+        else if (dataset == 2) {
             train_file = "/data/PrivLR/HFCR_bob";
-            test_file = "/data/PrivLR/HFCR_bob_test";
-        } else {
+            test_file  = "/data/PrivLR/HFCR_bob_test";
+        }
+        else {
             train_file = "/data/PrivLR/WIBC_bob";
-            test_file = "/data/PrivLR/WIBC_bob_test";
+            test_file  = "/data/PrivLR/WIBC_bob_test";
         }
     }
     BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(29));
@@ -170,11 +179,11 @@ void PrivLR_test(int& _party) {
 
     Logistic* logistic = new Logistic(party, io_pack);
     logistic->gradAscent(train_mat, train_label, num_iter, 0.008);
-    #ifdef USE_TIME_COUNT
-    std::cout << "linear time: " << linear_time << " ms\n";
-    std::cout << "non_linear time: " << non_linear_time << " ms\n";
-    std::cout << "time used: " << logistic_time << " ms\n";
-    #endif
+#ifdef USE_TIME_COUNT
+    std::cout << "linear time: " << logistic->linear->time_cost << " ms\n";
+    std::cout << "non_linear time: " << logistic->non_linear->time_cost << " ms\n";
+    std::cout << "time used: " << logistic->time_cost << " ms\n";
+#endif
 
     size_t comm   = io_pack->get_comm();
     size_t rounds = io_pack->get_rounds();
@@ -221,8 +230,8 @@ void PrivLR_test(int& _party) {
 
 int main(int argc, const char** argv) {
     assert(argc >= 4);
-    party = atoi(argv[1]);
-    dataset = atoi(argv[2]);
+    party    = atoi(argv[1]);
+    dataset  = atoi(argv[2]);
     num_iter = atoi(argv[3]);
     if (argc >= 5) {
         ip = argv[4];

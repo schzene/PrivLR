@@ -1,4 +1,4 @@
-#include "linear-elgamal.h"
+#include "protocols/linear-elgamal.h"
 
 namespace PrivLR_Elgamal {
 double Linear::dot_product(const vector<double>& in_a, const vector<double>& in_b) const {
