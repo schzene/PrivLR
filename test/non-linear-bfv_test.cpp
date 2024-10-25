@@ -82,12 +82,11 @@ vector<uint64_t> NonLinear_BFV::sigmoid(const vector<double>& in) const {
 
         io_pack->send_data(in_blind.data(), sizeof(double) * size);
         BFVLongCiphertext::send(io_pack->io, &r1_a);
-        BFVLongCiphertext::send(io_pack->io, &r3_a);
-        BFVLongCiphertext::send(io_pack->io, &r5_a);
-
 #ifdef USE_TIME_COUNT
         bfv_time += TIME_STAMP - b_start_time;
 #endif
+        BFVLongCiphertext::send(io_pack->io, &r3_a);
+        BFVLongCiphertext::send(io_pack->io, &r5_a);
 
         BFVLongCiphertext ret;
         BFVLongCiphertext::recv(io_pack->io_rev, &ret, party->parm->context);
@@ -144,6 +143,7 @@ vector<uint64_t> NonLinear_BFV::sigmoid(const vector<double>& in) const {
 }
 
 int party_;
+string ip = "127.0.0.1";
 
 void test_mpc(NonLinear* non_linear, const vector<double>& data) {
     std::random_device rd;
@@ -213,10 +213,13 @@ int main(int argc, const char** argv) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-3, 3);
 
-    size_t size  = 15;
-    size_t round = 25;
+    size_t size  = 100000;
 
-    party_ = argv[1][0] - '0';
+    assert(argc >= 2);
+    party_ = atoi(argv[1]); 
+    if (argc >= 3) {
+        ip = argv[2];
+    }
     if (party_ == ALICE) {
         std::cout << "Party: ALICE"
                   << "\n";
@@ -228,7 +231,7 @@ int main(int argc, const char** argv) {
     }
     BFVParm* parm   = new BFVParm(8192, default_prime_mod.at(29));
     BFVKey* party   = new BFVKey(party_, parm);
-    IOPack* io_pack = new IOPack(party_);
+    IOPack* io_pack = new IOPack(party_, ip);
 
     NonLinear* non_linear_mpc     = new NonLinear(party, io_pack);
     NonLinear_BFV* non_linear_bfv = new NonLinear_BFV(party, io_pack);
@@ -243,10 +246,8 @@ int main(int argc, const char** argv) {
         io_pack->recv_data(in.data(), sizeof(double) * size);
     }
 
-    for (size_t i = 0; i < round; i++) {
-        test_mpc(non_linear_mpc, in);
-        test_bfv(non_linear_bfv, in, party->parm->plain_mod);
-    }
+    test_mpc(non_linear_mpc, in);
+    test_bfv(non_linear_bfv, in, party->parm->plain_mod);
 
 #ifdef USE_TIME_COUNT
     std::cout << "mpc time count: " << non_linear_mpc->time_cost << "\n";
